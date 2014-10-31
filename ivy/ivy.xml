@@ -1,0 +1,25 @@
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+  <info organisation="de.l3s.streamcorpus" module="streamcorpus-indexer" revision="${version}"/>
+
+  <configurations>
+    <conf name="default"/>
+    <conf name="test" extends="default"/> 
+  </configurations>
+  
+  <publications>
+    <artifact type="pom" ext="pom" conf="default"/>
+    <artifact type="jar" ext="jar" conf="default"/>    
+  </publications>
+
+  <dependencies> 
+        
+    <!-- Hadoop dependencies. We just the the old MapReduce API here and so, every version is fine -->
+    <dependency org="org.apache.hadoop" name="hadoop-common" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
+    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
+                                        
+    <!-- Other utilities -->
+    <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.1" conf="*->*,!sources,!javadoc" />
+    <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.1" conf="*->*,!sources,!javadoc" />
+    
+  </dependencies>
+</ivy-module>
