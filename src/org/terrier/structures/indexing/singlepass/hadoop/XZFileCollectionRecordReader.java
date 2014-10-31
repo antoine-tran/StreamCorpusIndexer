@@ -1,8 +1,10 @@
 package org.terrier.structures.indexing.singlepass.hadoop;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -57,6 +59,15 @@ public class XZFileCollectionRecordReader extends FileCollectionRecordReader {
 			inputStream = new CountingInputStream(_input);
 			internalInputStream = codec.createInputStream(inputStream);
 		} 
+		
+		// Tuan: Add this part
+		// If the file is LZMA2 compressed, invoke the XZCompressionInput
+		else if (file.toString().endsWith(".xz")) {
+			inputStream = new CountingInputStream(_input);
+			internalInputStream = new XZCompressorInputStream(new BufferedInputStream(_input));			
+		}
+		
+		// Invoke the normal Collection (default TRECCollection) here
 		else 
 		{
 			if (start != 0) //TODO: start is always zero? 
