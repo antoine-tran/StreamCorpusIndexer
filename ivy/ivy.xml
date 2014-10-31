@@ -17,6 +17,9 @@
     <dependency org="org.apache.hadoop" name="hadoop-common" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
                                         
+    <!-- Support XZ compression -->
+    <dependency org="org.apache.commons" name="commons-compress" rev="1.5" conf="*->*,!sources,!javadoc" />
+                                        
     <!-- Other utilities -->
     <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.1" conf="*->*,!sources,!javadoc" />
     <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.1" conf="*->*,!sources,!javadoc" />
