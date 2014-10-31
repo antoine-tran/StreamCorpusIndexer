@@ -19,7 +19,10 @@
                                         
     <!-- Support XZ compression -->
     <dependency org="org.apache.commons" name="commons-compress" rev="1.5" conf="*->*,!sources,!javadoc" />
-                                        
+    
+    <!-- Thrift for Java -->
+    <dependency org="org.apache.thrift" name="libthrift" rev="0.9.0" conf="*->*,!sources,!javadoc" />
+                                            
     <!-- Other utilities -->
     <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.1" conf="*->*,!sources,!javadoc" />
     <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.1" conf="*->*,!sources,!javadoc" />
