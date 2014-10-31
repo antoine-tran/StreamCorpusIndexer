@@ -16,6 +16,6 @@ How to install and run
 
 2. Configure: To index the StreamCorpus, follow the same steps for configuring Terrier in Hadoop settings (http://terrier.org/docs/v4.0/hadoop_configuration.html), including the index path ("terrier.index.path") and collection path ("collection.spec"). Set the collection class with:
 
-trec.collection.class=de.l3s.streamcorpus.STCollection
+   trec.collection.class=de.l3s.streamcorpus.STCollection
 
 3. Run: Call the main function of StreamCorpusIndexing instead of trec_terrier.sh or HadoopIndexing, with their same set of arguments
