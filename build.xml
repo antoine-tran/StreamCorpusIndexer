@@ -134,7 +134,7 @@
   </target>
 
   <target name="compile" depends="init, resolve" description="compile the source ">
-    <javac target="1.6" encoding="${project.encoding}" classpathref="lib.path.id" srcdir="${src.dir}" destdir="${build.dir}" optimize="on" debug="on" includeantruntime="true">
+    <javac target="1.7" encoding="${project.encoding}" classpathref="lib.path.id" srcdir="${src.dir}" destdir="${build.dir}" optimize="on" debug="on" includeantruntime="true">
       <compilerarg value="-Xlint:unchecked" />
     </javac>
     <copy todir="${build.dir}">
