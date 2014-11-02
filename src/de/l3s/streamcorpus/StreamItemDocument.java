@@ -5,10 +5,13 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.terrier.indexing.Document;
 
 import streamcorpus.ContentItem;
+import streamcorpus.EntityType;
+import streamcorpus.Label;
 import streamcorpus.Sentence;
 import streamcorpus.StreamItem;
 import streamcorpus.Token;
@@ -24,12 +27,11 @@ public class StreamItemDocument implements Document {
 
 	/** 
 	 * The tokens of are organized in 3 dimensions: 
-	 * Fields, sentences in each field, and tokens in each sentences
+	 * Sections, sentences in each field, and tokens in each sentences
 	 * Use the pointers to check the position of the cursor in each
 	 * dimensions, to mark when reaching the end of document
 	 */
-	private ContentItem curField;
-	private int fieldCursor;
+	private ContentItem curSection;
 
 	private Sentence curSentence;
 	private int sentenceCursor;
@@ -37,16 +39,31 @@ public class StreamItemDocument implements Document {
 	private Token curToken;
 	private int tokenCursor;
 	
-	/** Are we in the lemma part or the raw part of the field set ? */
-	private boolean isLemma;
+	/** Currently supported taggers: Serif, Lingpipe */
+	private static enum TAGGER { Serif, Lingpipe };
+	private TAGGER curTagger;	
 
 	/**
 	 * Fields to be indexed:
-	 * - Document title / anchor,... (in other_content field)
+	 * - Document title (in other_content field)
 	 * - Sentences in raw
 	 * - POS tags annotated by Serif Tagger
 	 */
-	private LinkedHashSet<String> fields;
+	private static enum INDEXABLE {Title, Body, Lemma,
+		Serif_PER, Serif_ORG, Serif_LOC, Serif_MISC,
+		Lingpipe_PER, Lingpipe_ORG, Lingpipe_LOC, Lingpipe_MISC}; 
+	
+	// The stack of fields that the current term should be indexed to
+	// For all the tokens, we first index into "Lemma" field, for which the constant Lemma is used.
+	// Then we	
+	private Set<String> curFields;
+	private String titleOrBody;
+
+	
+	// A flag to keep the states of current token indexing: 0 - none indexed, 1 - lemma checked
+	// (indexed or not), 2 - token checked
+	private int tokenCheckState;
+	
 
 	/** document meta-data */
 	protected Map<String, String> properties;	
@@ -56,71 +73,27 @@ public class StreamItemDocument implements Document {
 
 	public StreamItemDocument(StreamItem item) {
 		this.item = item;
-		initFields();
+		curFields = new HashSet<>();
 		tokenCursor = -1;
 		sentenceCursor = -1;
-		fieldCursor = -1;
 	}
 
 	@Override
 	public Set<String> getFields() {
-		if (fields == null) {
-			initFields();
-		}
-		return fields;
-	}
-
-	private void initFields() {
-		fields = new LinkedHashSet<String>();
-
-		Set<String> fieldsInItem = item.getOther_content().keySet();
-
-		// Double check this
-		if (fieldsInItem.contains("title")) {
-			fields.add("title");
-		}
-
-		if (fieldsInItem.contains("anchor")) {
-			fields.add("anchor");
-		}
-
-		fields.add("content");
-
-		// Lemma part
-		if (fieldsInItem.contains("title")) {
-			fields.add("title_lemma");
-		}
-
-		if (fieldsInItem.contains("anchor")) {
-			fields.add("anchor_lemma");
-		}
-
-		fields.add("content_lemma");
-		
-		// Serif-annotated part. Optional: Only applied to StreamCorpus 
-		// collections that have (Serif) annotations
-		if (fieldsInItem.contains("title")) {
-			fields.add("title_serif");
-		}
-
-		if (fieldsInItem.contains("anchor")) {
-			fields.add("anchor_serif");
-		}
-
-		fields.add("content_serif");
+		return curFields;
 	}
 
 	@Override
 	public boolean endOfDocument() {		
-		return (endOfSentence() && endOfField() && (fieldCursor == fields.size()));
+		return (endOfSentence() && endOfSection() && (curSection == item.getBody()));
 	}
 
 	private boolean endOfSentence() {
 		return (tokenCursor == curSentence.tokens.size());
 	}
 
-	private boolean endOfField() {
-		return (sentenceCursor == curField.getSentencesSize());
+	private boolean endOfSection() {
+		return (sentenceCursor == curSection.getSentencesSize());
 	}
 
 	@Override
@@ -155,37 +128,83 @@ public class StreamItemDocument implements Document {
 	{
 		return properties;
 	}
-
+	
 	@Override
 	// Order of traversing: title, anchor, raw, serif
 	// Lazy move of cursors in 3 dimensions in-side out
 	public String getNextTerm() {
-		if (curToken == null) {
-			if (!hashNextToken()) {
+		curFields.clear();
+		String t = null;
+		if (curToken == null || tokenCheckState == 2) {
+			if (!internalNextToken()) {
 				return null;
-			}			
+			} else {
+				tokenCheckState = 0;
+			}
 		}
-		return (isLemma) ? curToken.getLemma() : curToken.getToken();
+		if (tokenCheckState == 0) {
+			tokenCheckState = 1;
+			t = curToken.getLemma();
+			if (t.length() > 1) {
+				curFields.add(INDEXABLE.Lemma.toString());
+				return t;
+			}
+		}
+		if (tokenCheckState == 1) {
+			if (curTagger == TAGGER.Serif) {
+				curFields.add(titleOrBody);
+			}
+			EntityType type = curToken.getEntity_type();
+			addField(type);
+			t = curToken.getToken();
+			tokenCheckState = 2;	
+			return t;
+		}
+		else throw new RuntimeException("Invalid state when checking token: " + curToken + ", " + tokenCheckState);
 	}
 	
-	private boolean hasNextToken() {
+	private void addField(EntityType type) {
+		if (type == EntityType.PER) curFields.add((curTagger == TAGGER.Serif) 
+				? INDEXABLE.Serif_PER.toString()
+				: INDEXABLE.Lingpipe_PER.toString());
+		if (type == EntityType.ORG) curFields.add((curTagger == TAGGER.Serif) 
+				? INDEXABLE.Serif_ORG.toString()
+				: INDEXABLE.Lingpipe_ORG.toString());
+		if (type == EntityType.LOC) curFields.add((curTagger == TAGGER.Serif) 
+				? INDEXABLE.Serif_LOC.toString()
+				: INDEXABLE.Lingpipe_LOC.toString());
+		if (type == EntityType.MISC) curFields.add((curTagger == TAGGER.Serif) 
+				? INDEXABLE.Serif_MISC.toString()
+				: INDEXABLE.Lingpipe_MISC.toString());
+	}
+	
+	// Ignore tokens about 
+	private boolean internalNextToken() {
 		if (endOfSentence()) {
 			if (!hasNextSentence()) {
 				return false;
 			} else tokenCursor = -1;
 		}
-		tokenCursor++;
-		curToken = curSentence.getTokens().get(tokenCursor);
+					
+		}
+		while (true) {
+			tokenCursor++;
+			Token tmpToken = curSentence.getTokens().get(tokenCursor);
+			EntityType et = tmpToken.entity_type;
+		}		
+		
+		return true;
 	}
 	
 	private boolean hasNextSentence() {
-		if (endOfField()) {
+		if (endOfSection()) {
 			if (!hasNextField()) {
 				return false;
 			} else sentenceCursor = -1;
 		}
 		sentenceCursor++;
-		curSentence = curField.getSentences().get("").get(sentenceCursor);
+		curSentence = curSection.getSentences().get("").get(sentenceCursor);
+		return true;
 	}
 	
 	private boolean hashNextField() {
