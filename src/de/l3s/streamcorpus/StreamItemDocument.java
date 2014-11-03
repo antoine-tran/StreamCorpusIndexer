@@ -71,7 +71,7 @@ public class StreamItemDocument implements Document {
 		public StreamItemDocument(StreamItem item, Map<String, String> docProps) {
 			this.item = item;
 			this.properties = docProps;
-			
+
 			curFields = new HashSet<>();
 			tokenCursor = -1;
 			sentenceCursor = -1;

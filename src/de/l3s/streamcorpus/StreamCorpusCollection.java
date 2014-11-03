@@ -1,18 +1,13 @@
 package de.l3s.streamcorpus;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -21,6 +16,7 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.terrier.indexing.Collection;
 import org.terrier.indexing.Document;
+import org.terrier.utility.Files;
 import org.terrier.utility.io.CountingInputStream;
 
 import streamcorpus.StreamItem;
@@ -49,7 +45,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 	protected int FileNumber = -1;
 
 	/** list of files to be processed */
-	private ArrayList<Path> files = new ArrayList<>();
+	private ArrayList<String> files = new ArrayList<>();
 
 	/** Indicates whether the end of the collection has been reached.*/
 	protected boolean endOfCollection = false;
@@ -62,29 +58,15 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 	private TBinaryProtocol tp;
 
 	/** Underlying reading streams */
-	private FSDataInputStream fis;
-	private BufferedInputStream bis;
-	private XZCompressorInputStream xzis;
+	private CountingInputStream is;
 
-	/** file system in Hadoop cluster */
-	private FileSystem fs;
-
-	public StreamCorpusCollection(FileSystem fileSystem, List<FileStatus> inputs) {
-		this.fs = fileSystem;
-		files = new ArrayList<>(inputs.size());
-		for (FileStatus input : inputs) {
-			files.add(input.getPath());
-		}
-
-		//open the first file
-		try {
-			openNextFile();
-		} catch (IOException ioe) {
-			logger.error("IOException opening first file of collection " +
-					"- is the collection.spec correct?", ioe);
-		}
+	/** In Hadoop mode, Terrier opens a new collection for each file split in HDFS */
+	public StreamCorpusCollection(InputStream input) {		
+		files = new ArrayList<>();		
+		br = input instanceof CountingInputStream ? (CountingInputStream)input 
+				: new CountingInputStream(input);		
 	}
-
+	
 	/**
 	 * Check whether it is the end of the collection
 	 * @return boolean
@@ -136,7 +118,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 	@Override
 	public boolean nextDocument() {
 		//move the stream to the start of the next document
-		//try next file if error / eof encountered. (and set endOfCOllection if
+		//try next file if error / eof encountered. (and set endOfCollection if
 		// needed)
 		boolean bScanning = true;
 		scanning:
@@ -144,7 +126,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 
 				try {
 					// value
-					if (fis.available() > 0) {
+					if (tp == null) {
 						try {
 							item.read(tp);
 						} catch (TTransportException e) {				
@@ -195,6 +177,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		return endOfCollection;
 	}
 
+	// For compatibility purpose. This method isn't really useful in Hadoop setting
 	protected boolean openNextFile() throws IOException {
 		// close the currently open file
 		if (br != null && files.size() > 0) {
@@ -208,29 +191,37 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		while (tryFile) {
 			if (FileNumber < files.size() - 1) {
 				FileNumber++;
-				Path p = files.get(FileNumber);
-
-				if (!fs.exists(p)) {
-					logger.warn("File " + p + " not found");
+				String filename = files.get(FileNumber).toString();
+				if (! Files.exists(filename)) {
+					logger.warn("Could not open "+filename+" : File Not Found");
 				}
-				else {
-					fis = fs.open(p);
-					br = new CountingInputStream(fis);
-					bis = new BufferedInputStream(fis);
-					xzis = new XZCompressorInputStream(bis);
-					transport = new TIOStreamTransport(xzis);
+				else if (! Files.canRead(filename)) {
+					logger.warn("Could not open "+filename+" : Cannot read");
+				} else {
+					
+					// support XZ compression
+					if (filename.endsWith(".xz")) {
+						br = new CountingInputStream(
+								new XZCompressorInputStream(
+										Files.openFileStream(filename)));	
+					}
+					else {
+						br = new CountingInputStream(
+								Files.openFileStream(filename));
+					}					
+					transport = new TIOStreamTransport(br);
 
 					try {
 						transport.open();
 					} catch (TTransportException e) {
-						logger.error("Couldn't open file " + p.toString());
+						logger.error("Couldn't open file " + filename);
 						e.printStackTrace();
 						transport = null;
 					}
 
 					if (transport != null) {
 						tp = new TBinaryProtocol(transport);
-						currentFilename = p.toString();
+						currentFilename = filename;
 						tryFile = false;
 						rtr = true;
 					}
@@ -252,7 +243,8 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		try {
 			openNextFile();
 		} catch (IOException ioe) {
-			logger.warn("IOException while resetting collection - ie re-opening first file", ioe);
+			logger.warn("IOException while resetting collection "
+					+ "- ie re-opening first file", ioe);
 		}
 
 	}
@@ -260,10 +252,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 
 	@Override
 	public void close() throws IOException {
-		if (transport != null) transport.close();
-		if (xzis != null) xzis.close();
-		if (bis != null) bis.close();
-		if (fis != null) fis.close();
+		if (transport != null) transport.close();		
 		if (br != null) br.close();
 	}
 }
