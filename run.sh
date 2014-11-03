@@ -16,7 +16,7 @@ echo Starting....
 
 export HADOOP_CLIENT_OPTS="-Xmx2048m $HADOOP_CLIENT_OPTS"
 export HADOOP_MAPRED_HOME="/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce"
-
+export HADOOP_HOME="/opt/cloudera/parcels/CDH/lib/hadoop"
 #setup TERRIER_HOME
 if [ ! -n "$TERRIER_HOME" ]
 then
