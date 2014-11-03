@@ -4,7 +4,7 @@
 
 #!/bin/sh
 LIB=$(pwd)/lib
-LOCAL_LIB=$(pwd)/lib
+LOCAL_LIB=$(pwd)/ivy/local-repo
 
 LOG4J=-Dlog4j.configuration=file:etc/log4j.properties
 
@@ -21,8 +21,9 @@ do
 CLPA=$CLPA:$jarf
 HCLPA=$HCLPA,$jarf
 done
-CLPA=${CLPA:1:${#CLPA}-1}
-HCLPA=${HCLPA:1:${#HCLPA}-1}
+echo $CLPA
+# CLPA=${CLPA:1:${#CLPA}-1}
+# HCLPA=${HCLPA:1:${#HCLPA}-1}
 CLPD=$CLPA:$JAR_PATH
 HCLPDA=$HCLPA,$JAR_PATH
 export HADOOP_CLASSPATH="$CLPD:$HADOOP_CLASSPATH:/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce/conf"
