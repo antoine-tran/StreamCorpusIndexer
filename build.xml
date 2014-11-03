@@ -156,7 +156,7 @@
   </target>
 	
   <target name="fatjar" description="generate the single jar">
-	<jar jarfile="${dist.dir}/${groupId}-${artifactId}-${version}-fat.jar" basedir="${build.dir}">
+	<jar jarfile="${dist.dir}/${artifactId}-${version}-fat.jar" basedir="${build.dir}">
 	  <zipgroupfileset dir="${local-lib.dir}" includes="*.jar"/>
 		<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
 		<manifest>
