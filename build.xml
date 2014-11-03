@@ -157,7 +157,8 @@
 	
   <target name="fatjar" description="generate the single jar">
 	<jar jarfile="${dist.dir}/${groupId}-${artifactId}-${version}-fat.jar" basedir="${build.dir}">
-	  <zipgroupfileset dir="${lib.dir}" includes="*.jar"/>	
+	  <zipgroupfileset dir="${local-lib.dir}" includes="*.jar"/>
+		<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
 		<manifest>
 		   <attribute name="Main-Class" value="org.terrier.applications.HadoopIndexing"/>
 		</manifest>
