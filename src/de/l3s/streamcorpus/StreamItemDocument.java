@@ -55,12 +55,12 @@ public class StreamItemDocument implements Document {
 		// Then we	
 		private Set<String> curFields;
 		private String titleOrBody;
+		private boolean contentIndexed;
 
 
-		// A flag to keep the states of current token indexing: 0 - none indexed, 1 - lemma checked
-		// (indexed or not), 2 - token checked
+		// A flag to keep the states of current token indexing: -1 - none indexed, 0 - lemma checked
+		// (indexed or not), 1 - token checked
 		private int tokenCheckState;
-
 
 		/** document meta-data */
 		protected Map<String, String> properties;	
@@ -68,12 +68,16 @@ public class StreamItemDocument implements Document {
 		/** reference to the root stream item to move the cursors along the 3 dimensions */
 		private StreamItem item; 
 
-		public StreamItemDocument(StreamItem item) {
+		public StreamItemDocument(StreamItem item, Map<String, String> docProps) {
 			this.item = item;
+			this.properties = docProps;
+			
 			curFields = new HashSet<>();
 			tokenCursor = -1;
 			sentenceCursor = -1;
 			tokenCheckState = -1;
+			curTagger = null;
+			contentIndexed = false;
 		}
 
 		@Override
@@ -135,6 +139,8 @@ public class StreamItemDocument implements Document {
 			String t = null;
 
 			// keep fetching the next valid token
+			// Note: After successfully calling internalNextToken(), the
+			// tokenCheckState should never be 1
 			if (internalNextToken()) {
 				if (tokenCheckState == -1) {
 					tokenCheckState = 0;
@@ -145,7 +151,7 @@ public class StreamItemDocument implements Document {
 					} else curFields.clear();
 				}
 				if (tokenCheckState == 0) {
-					if (curTagger == TAGGER.Serif) {
+					if (!contentIndexed) {
 						curFields.add(titleOrBody);
 					}
 					EntityType type = curToken.getEntity_type();
@@ -157,7 +163,7 @@ public class StreamItemDocument implements Document {
 				else throw new RuntimeException("Invalid state when checking token: "
 						+ curToken + ", " + tokenCheckState);	
 			}
-			
+
 			// This happens only if the document is empty
 			return null;
 		}
@@ -177,13 +183,17 @@ public class StreamItemDocument implements Document {
 							: INDEXABLE.Lingpipe_MISC.toString());
 		}
 
-		// Keep fetching the next valid token 
-		private boolean internalNextToken() {
+		// Fetch the next token, and at the same time move the token cursor
+		private boolean internalNextToken() {			
 			if (tokenCheckState == 0 && curToken != null) {
 				return true;
 			}
 			else if (tokenCheckState == 1) {
+
 				if (endOfSentence()) {
+
+					// if endOfSentence() returns true, the token 
+					// list should never be empty
 					if (!internalNextSentence()) {
 						return false;
 					} else {
@@ -195,7 +205,7 @@ public class StreamItemDocument implements Document {
 				curToken = curSentence.getTokens().get(tokenCursor);
 				return true;
 			}
-			
+
 			// Check StreamItem for the first time
 			else if (tokenCheckState == -1 || curToken == null) {
 				if (!internalNextSentence()) {
@@ -208,37 +218,88 @@ public class StreamItemDocument implements Document {
 				curToken = curSentence.getTokens().get(tokenCursor);
 				return true;
 			}
-			
+
 			else throw new RuntimeException("Error fetching the next token: "
 					+ curToken + ", " + tokenCheckState);
 		}
 
-		// Fetch the next sentence, or get the first sentence 
+		// Repeatedly fetch the next non-empty sentence, 
+		// and change curSentence and sentenceCursor at the same time
 		private boolean internalNextSentence() {
-			
-			if (sentenceCursor == -1 || curSentence == null) {
-				if (!internalNextSection()) {
-					return false;
-				} else {
-					sentenceCursor = -1;
-					
+
+			while (curSentence == null || curSentence.getTokens().size() == 0) {
+				if (curSentence == null || endOfSection()) {
+
+					// NOTE: If internalNextSection() returns true, curTagger should never be null
+					if (!internalNextSection()) {
+						return false;
+					} else {
+						sentenceCursor = -1;
+					}
+				}
+				sentenceCursor++;
+				if (curTagger == TAGGER.Serif) {
+					curSentence = curSection.getSentences().get("serif").get(sentenceCursor);
+				} else if (curTagger == TAGGER.Lingpipe) {
+					curSentence = curSection.getSentences().get("lingpipecounter").get(sentenceCursor);
+				} else{
+					throw new RuntimeException("Unknown tagger: " + curTagger);
 				}
 			}
-			
-			if (endOfSection()) {
-				if (!internalNextSection()) {
-					return false;
-				} else sentenceCursor = -1;
-			}
-			sentenceCursor++;
-			curSentence = curSection.getSentences().get("").get(sentenceCursor);
-			return true;
-			
+			return false;
 		}
 
 		private boolean internalNextSection() {
 			if (endOfDocument()) {
 				return false;
 			}
+
+			// First time --> go to other_anchor
+			if (curSection == null) {
+				Map<String, ContentItem> metas = item.getOther_content();
+				if (metas.containsKey("title")) {
+					curSection = metas.get("title");
+					titleOrBody = "title";
+				} else {
+					curSection = item.getBody();
+					titleOrBody = "body";
+				}
+				contentIndexed = false;
+				curTagger = null;
+			}
+			if (curTagger == null) {
+				if (curSection.getSentences().containsKey("serif")) {
+					curTagger = TAGGER.Serif;
+					return true;
+				}
+				else if (curSection.getSentences().containsKey("lingpipecounter")) {
+					curTagger = TAGGER.Lingpipe;
+					return true;
+				}
+				else if (curSection == item.getBody()) {
+					return false;
+				}
+				else throw new RuntimeException("Unknown tagger: " + curTagger);
+			}
+			else if (curTagger == TAGGER.Serif 
+					&& curSection.getSentences().containsKey("lingpipecounter")) {
+				curTagger = TAGGER.Lingpipe;
+				contentIndexed = true;
+				return true;
+			}
+			else if ((curTagger == TAGGER.Serif 
+					&& !curSection.getSentences().containsKey("lingpipecounter"))
+					|| (curTagger == TAGGER.Lingpipe)) {
+				if (curSection != item.getBody()) {
+					curSection = item.getBody();
+					contentIndexed = false;
+					titleOrBody = "body";
+					curTagger = null;
+					return true;
+				} else {
+					return false;
+				}
+			}
+			else throw new RuntimeException("Unknown tagger transition (Old: " + curTagger + ")");
 		}
 }
