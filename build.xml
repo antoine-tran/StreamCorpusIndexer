@@ -160,7 +160,7 @@
 	  <zipgroupfileset dir="${local-lib.dir}" includes="*.jar"/>
 		<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
 		<manifest>
-		   <attribute name="Main-Class" value="org.terrier.applications.HadoopIndexing"/>
+		   <attribute name="Main-Class" value="de.l3s.streamcorpus.NewHadoopIndexing"/>
 		</manifest>
 	</jar>
   </target>

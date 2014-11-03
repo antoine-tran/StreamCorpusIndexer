@@ -27,10 +27,12 @@ done
 CLPD=$CLPA:$JAR_PATH
 HCLPDA=$HCLPA,$JAR_PATH
 
+
 # Optional: set up the version of the old mapred API here (We use CDH 4.6.0 for testing)
 export HADOOP_MAPRED_HOME="/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce"
 export HADOOP_HOME="/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce"
 export HADOOP_CLIENT_OPTS="-Xmx2048m $HADOOP_CLIENT_OPTS"
+export HADOOP_CLASSPATH="$CLPD:$HADOOP_CLASSPATH:/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce/conf"
 
 #setup TERRIER_HOME
 if [ ! -n "$TERRIER_HOME" ]
