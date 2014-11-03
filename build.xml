@@ -143,10 +143,7 @@
   </target>
 
   <target name="jar" depends="compile" description="generate the distribution">
-    <jar jarfile="${dist.dir}/${artifactId}-${version}.jar" basedir="${build.dir}"/>
-  	<copy todir="${lib.dir}">
-  	  <fileset dir="${local-lib.dir}" includes="**"/>
-  	</copy> 
+    <jar jarfile="${dist.dir}/${artifactId}-${version}.jar" basedir="${build.dir}"/>  	 
   </target>
 		
   <target name="copy-local-ivy-to-lib">
@@ -155,7 +152,7 @@
   	</copy> 
   </target>
 	
-  <target name="fatjar" description="generate the single jar">
+  <target name="fatjar" depends="compile" description="generate the single jar">
 	<jar jarfile="${dist.dir}/${artifactId}-${version}-fat.jar" basedir="${build.dir}">
 	  <zipgroupfileset dir="${local-lib.dir}" includes="*.jar"/>
 		<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
