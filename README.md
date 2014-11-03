@@ -18,4 +18,4 @@ How to install and run
 
      <code> trec.collection.class=de.l3s.streamcorpus.StreamCorpusCollection</code>
 
-3. Run: Call the main function of StreamCorpusIndexing instead of trec_terrier.sh or HadoopIndexing, with their same set of arguments
+3. Run: Call HadoopIndexing with the similar set of arguments. That's it !
