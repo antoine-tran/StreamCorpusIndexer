@@ -175,7 +175,7 @@ public class NewHadoopIndexing extends Configured implements Tool
 		if (jf == null)
 			throw new Exception("Could not get JobFactory from HadoopPlugin");
 		final JobConf conf = jf.newJob();
-						
+		conf.setJarByClass(NewHadoopIndexing.class);
 		conf.setJobName("terrierIndexing");
 		if (Files.exists(ApplicationSetup.TERRIER_INDEX_PATH) && Index.existsIndex(ApplicationSetup.TERRIER_INDEX_PATH, ApplicationSetup.TERRIER_INDEX_PREFIX))
 		{
