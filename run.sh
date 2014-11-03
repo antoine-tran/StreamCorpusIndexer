@@ -1,6 +1,6 @@
 #!/bin/sh
 HEAP_MEM=-Xmx4096m
-LOG4J=-Dlog4j.configuration=file:etc/log4j.properties
+LOG4J=-Dlog4j.configuration=etc/log4j.properties
 LIB=./lib
 LOCAL_LIB=./ivy/local-repo
 MAIN_CLASS=$1
@@ -22,7 +22,7 @@ CLPA=$CLPA:$HADOOP_CLASSPATH
 
 # Add Hadoop conf to classpath
 CLPD=$CLPA:/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce/conf
-export HADOOP_CLASSPATH="$CLPD:$HADOOP_CLASSPATH"
+export HADOOP_CLASSPATH="$CLPD$HADOOP_CLASSPATH"
 echo $HADOOP_CLASSPATH
 echo Starting....
 
