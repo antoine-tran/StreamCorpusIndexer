@@ -78,8 +78,8 @@ public class XZFileCollectionRecordReader extends FileCollectionRecordReader {
 			internalInputStream = inputStream = new CountingInputStream(_input, start);
 		}
 		Collection rtr = CollectionFactory.loadCollection(
-			ApplicationSetup.getProperty("trec.collection.class", "TRECCollection"), 
-			new Class[]{InputStream.class}, 
+			ApplicationSetup.getProperty("trec.collection.class", "StreamCorpusCollection"), 
+			new Class[]{FileSystem.class}, 
 			new Object[]{internalInputStream});
 
 		if (rtr == null)
