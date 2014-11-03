@@ -32,4 +32,4 @@ then
   TERRIER_ETC=$TERRIER_HOME/etc
 fi
 export terrier.home=$TERRIER_HOME
-java $HEAP_MEM $LOG4J -cp $CLPA -Dterrier.home=$TERRIER_HOME -Dterrier.setup=$TERRIER_HOME $MAIN_CLASS $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}
+java $HEAP_MEM $LOG4J -cp $CLPA -Dterrier.home=$TERRIER_HOME $MAIN_CLASS $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}
