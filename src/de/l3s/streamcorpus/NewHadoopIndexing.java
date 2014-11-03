@@ -127,10 +127,8 @@ public class NewHadoopIndexing extends Configured implements Tool
 	public int run(String[] args) throws Exception {
 		long time = System.currentTimeMillis();
 			
-		// Add to system properties the terrier.home
-		String property = getConf().get("terrier.home");
-		System.out.println("Terrier home: " + property);
-		System.setProperty("terrier.home", property);
+		// For the moment: Hard-code the terrier home
+		System.setProperty("terrier.home", "/home/tuan.tran/executable/StreamCorpusIndexer");
 		
 		boolean docPartitioned = false;
 		int numberOfReducers = Integer.parseInt(ApplicationSetup.getProperty("terrier.hadoop.indexing.reducers", "26"));
