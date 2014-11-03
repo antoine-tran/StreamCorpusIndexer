@@ -7,7 +7,7 @@ LIB=$(pwd)/lib
 LOCAL_LIB=$(pwd)/lib
 
 # path to your jar file here. Default is the maven artifact in your local repo
-export JAR_PATH="bin/streamcorpus-indexer-0.1-SNAPSHOT-fat.jar"
+export JAR_PATH="bin/streamcorpus-indexer-0.1-SNAPSHOT.jar"
 
 for jarf in $LIB/*.jar
 do
