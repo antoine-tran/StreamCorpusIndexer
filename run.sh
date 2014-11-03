@@ -8,7 +8,14 @@ do
 CLPA=$CLPA:$jarf
 done
 CLPA=$CLPA:bin/streamcorpus-indexer-0.1-SNAPSHOT.jar
+CLPA=$CLPA:$HADOOP_CLASSPATH
+
+# Add Hadoop conf to classpath
+CLPA=$CLPA:/opt/cloudera/parcels/CDH/etc/hadoop/conf.pseudo.mr1
 echo Starting....
+
+export HADOOP_CLIENT_OPTS="-Xmx2048m $HADOOP_CLIENT_OPTS"
+export HADOOP_MAPRED_HOME="/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce"
 
 #setup TERRIER_HOME
 if [ ! -n "$TERRIER_HOME" ]
