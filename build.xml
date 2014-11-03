@@ -144,6 +144,9 @@
 
   <target name="jar" depends="compile" description="generate the distribution">
     <jar jarfile="${dist.dir}/${artifactId}-${version}.jar" basedir="${build.dir}"/>
+  	<copy todir="${lib.dir}">
+  	  <fileset dir="${local-lib.dir}" includes="**"/>
+  	</copy> 
   </target>
 		
   <target name="copy-local-ivy-to-lib">
