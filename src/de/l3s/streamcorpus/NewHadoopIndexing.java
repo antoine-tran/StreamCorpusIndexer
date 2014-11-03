@@ -128,7 +128,7 @@ public class NewHadoopIndexing extends Configured implements Tool
 		long time = System.currentTimeMillis();
 			
 		// For the moment: Hard-code the terrier home
-		// System.setProperty("terrier.home", "/home/tuan.tran/executable/StreamCorpusIndexer");
+		System.setProperty("terrier.home", "/home/tuan.tran/executable/StreamCorpusIndexer");
 		
 		boolean docPartitioned = false;
 		int numberOfReducers = Integer.parseInt(ApplicationSetup.getProperty("terrier.hadoop.indexing.reducers", "26"));
