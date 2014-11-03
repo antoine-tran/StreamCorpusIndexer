@@ -15,10 +15,8 @@ if [ ! -n "$TERRIER_HOME" ]
 then
   #find out where this script is running
   TEMPVAR=`dirname $0`
-  #make the path abolute
-  fullPath TEMPVAR
   #terrier folder is folder above
-  TERRIER_HOME=`dirname $TEMPVAR`
+  TERRIER_HOME=`pwd $TEMPVAR`
   echo "Setting TERRIER_HOME to $TERRIER_HOME"
 fi
 #setup TERRIER_ETC
