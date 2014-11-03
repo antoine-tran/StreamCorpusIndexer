@@ -26,7 +26,6 @@ done
 # HCLPA=${HCLPA:1:${#HCLPA}-1}
 CLPD=$CLPA:$JAR_PATH
 HCLPDA=$HCLPA,$JAR_PATH
-export HADOOP_CLASSPATH="$CLPD:$HADOOP_CLASSPATH:/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce/conf"
 
 # Optional: set up the version of the old mapred API here (We use CDH 4.6.0 for testing)
 export HADOOP_MAPRED_HOME="/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce"
