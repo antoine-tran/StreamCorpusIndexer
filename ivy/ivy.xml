@@ -17,6 +17,9 @@
     <dependency org="org.apache.hadoop" name="hadoop-common" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
+    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-jobclient" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
+    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-common" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
+    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-shuffle" rev="2.3.0-cdh5.1.0" conf="*->*,!sources,!javadoc"/>
                                         
     <!-- Support compressions -->    
     <dependency org="org.apache.commons" name="commons-compress" rev="1.5" conf="*->*,!sources,!javadoc" />
