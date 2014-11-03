@@ -33,6 +33,7 @@
     <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.1" conf="*->*,!sources,!javadoc" />
     <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.1" conf="*->*,!sources,!javadoc" />
     <dependency org="net.sf.trove4j" name="trove4j" rev="2.0.2" conf="*->*,!sources,!javadoc"/>
+    <dependency org="com.google.code.findbugs" name="jsr305" rev="3.0.0" conf="*->*,!sources,!javadoc"/>
     
     
   </dependencies>
