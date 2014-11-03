@@ -156,7 +156,7 @@
 	<jar jarfile="${dist.dir}/${groupId}-${artifactId}-${version}-fat.jar" basedir="${build.dir}">
 	  <zipgroupfileset dir="${lib.dir}" includes="*.jar"/>	
 		<manifest>
-		   <attribute name="Main-Class" value="org.terrier.applications.StreamCorpusIndexing"/>
+		   <attribute name="Main-Class" value="org.terrier.applications.HadoopIndexing"/>
 		</manifest>
 	</jar>
   </target>
@@ -203,10 +203,10 @@
 	<echo file="./etc/hadoop-local.${suffix}" message="hadoop jar ${basedir}/${dist.dir}/${artifactId}-${version}.jar ${param_prefix}1 -D mapreduce.framework.name=local -D mapreduce.jobtracker.address=local -D fs.default.name=file:/// -D mapreduce.cluster.local.dir=/tmp/mapred/local -D mapreduce.cluster.temp.dir=/tmp/mapred/temp -D mapreduce.jobtracker.staging.root.dir=/tmp/mapred/staging -D mapreduce.jobtracker.system.dir=/tmp/mapred/system ${param_prefix}2 ${param_prefix}3 ${param_prefix}4 ${param_prefix}5 ${param_prefix}6 ${param_prefix}7 ${param_prefix}8 ${param_prefix}9 ${param_prefix}{10} ${param_prefix}{11} ${param_prefix}{12} ${param_prefix}{13} ${param_prefix}{14} ${param_prefix}{15} ${param_prefix}{16} ${param_prefix}{17} ${param_prefix}{18} ${param_prefix}{19} ${param_prefix}{20}${line.separator}" append="true" />
 
 	<echo file="./etc/hadoop-cluster.${suffix}" message="${script_prefix}" />
-  	<echo file="./etc/hadoop-cluster.${suffix}" message="export HADOOP_MAPRED_HOME=&quot;/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce&quot;${line.separator}" append="true"/>
+  <echo file="./etc/hadoop-cluster.${suffix}" message="export HADOOP_MAPRED_HOME=&quot;/opt/cloudera/parcels/CDH/lib/hadoop-0.20-mapreduce&quot;${line.separator}" append="true"/>
 	<echo file="./etc/hadoop-cluster.${suffix}" message="hadoop jar ${basedir}/${dist.dir}/${artifactId}-${version}.jar ${param_prefix}1 -libjars ${scriptjars.path.id} ${param_prefix}2 ${param_prefix}3 ${param_prefix}4 ${param_prefix}5 ${param_prefix}6 ${param_prefix}7 ${param_prefix}8 ${param_prefix}9 ${param_prefix}{10} ${param_prefix}{11} ${param_prefix}{12} ${param_prefix}{13} ${param_prefix}{14} ${param_prefix}{15} ${param_prefix}{16} ${param_prefix}{17} ${param_prefix}{18} ${param_prefix}{19} ${param_prefix}{20} ${param_prefix}{21} ${param_prefix}{22} ${param_prefix}{23} ${param_prefix}{24} ${param_prefix}{25} ${param_prefix}{26} ${param_prefix}{27} ${param_prefix}{28} ${param_prefix}{29} ${param_prefix}{30}${line.separator}" append="true" />
 
-    <echo file="./etc/run_local.${suffix}" message="#!/bin/sh${line.separator}" />
+  <echo file="./etc/run_local.${suffix}" message="#!/bin/sh${line.separator}" />
 	<echo file="./etc/run_local.${suffix}" message="HEAP_MEM=-Xmx4096m${line.separator}" append="true"/>
 	<echo file="./etc/run_local.${suffix}" message="LOG4J=-Dlog4j.configuration=file:${etc.dir}/log4j.properties${line.separator}" append="true"/>
 	<echo file="./etc/run_local.${suffix}" message="LIB=./lib${line.separator}" append="true" />
@@ -214,6 +214,9 @@
   	<echo file="./etc/run_local.${suffix}" message="for jarf in ${param_prefix}LIB/*.jar${line.separator}" append="true" />
   	<echo file="./etc/run_local.${suffix}" message="do${line.separator}CLPA=${param_prefix}CLPA:${param_prefix}jarf${line.separator}done${line.separator}" append="true" />
   	<echo file="./etc/run_local.${suffix}" message="CLPA=${param_prefix}CLPA:${dist.dir}/${artifactId}-${version}.jar${line.separator}" append="true" />
+  	
+  	<!-- Add core-site.xml to classpath for Terrier to recognize the dedicated cluster. If your cluster has a different setting, change this accordingly -->
+  	<echo file="./etc/run_local.${suffix}" message="CLPA=${param_prefix}CLPA:/opt/cloudera/parcels/CDH/etc/hadoop/conf.pseudo.mr1:" append="true" />
   	<echo file="./etc/run_local.${suffix}" message="echo Starting....${line.separator}" append="true" />
   	<echo file="./etc/run_local.${suffix}" message="java ${param_prefix}HEAP_MEM ${param_prefix}LOG4J -cp ${param_prefix}CLPA ${param_prefix}MAIN_CLASS ${param_prefix}2 ${param_prefix}3 ${param_prefix}4 ${param_prefix}5 ${param_prefix}6 ${param_prefix}7 ${param_prefix}8 ${param_prefix}9 ${param_prefix}{10} ${param_prefix}{11} ${param_prefix}{12} ${param_prefix}{13} ${param_prefix}{14} ${param_prefix}{15} ${param_prefix}{16} ${param_prefix}{17} ${param_prefix}{18} ${param_prefix}{19} ${param_prefix}{20}${line.separator}" append="true" />
   	
