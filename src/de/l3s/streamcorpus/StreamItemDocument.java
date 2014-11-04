@@ -292,11 +292,16 @@ public class StreamItemDocument implements Document {
 			// First time --> go to other_anchor
 			if (curSection == null) {
 				Map<String, ContentItem> metas = item.getOther_content();
-				if (metas.containsKey("title")) {
-					curSection = metas.get("title");
+				if (metas.containsKey("title") 
+						&& metas.get("title").clean_visible != null 
+						&& metas.get("title").clean_visible.length() > 0) {
+					curSection = metas.get("title");					
 					titleOrBody = "title";
 				} else {
 					curSection = item.getBody();
+					if (curSection.clean_visible == null || curSection.clean_visible.length() == 0) {
+						return false;
+					}
 					titleOrBody = "body";
 				}
 				contentIndexed = false;
@@ -315,10 +320,11 @@ public class StreamItemDocument implements Document {
 					return true;
 				}
 				else if (curSection == item.getBody()) {
+					
+					// what to do if the body has no tagger ? For the moment, skip it					
 					return false;
 				}
-				else {
-					// what to do if the body has no tagger ?
+				else {					
 					logger.info(" We are " + ((curSection == item.getBody()) ? " in body" : " not in body" ));
 					
 					logger.info("Taggers available: ");
