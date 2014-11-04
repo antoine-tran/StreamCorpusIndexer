@@ -229,7 +229,7 @@ public class StreamItemDocument implements Document {
 					if (!internalNextSentence()) {
 						return false;
 					} else {
-						tokenCursor = -1;						
+						tokenCursor = 0;						
 					}
 				}
 				curToken = curSentence.getTokens().get(tokenCursor);
