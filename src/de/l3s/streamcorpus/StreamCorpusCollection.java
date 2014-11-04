@@ -60,14 +60,34 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 	/** Underlying reading streams */
 	private CountingInputStream is;
 
-	/** In Hadoop mode, Terrier opens a new collection for each file split in HDFS */
-	public StreamCorpusCollection(InputStream input) {		
+	/** In Hadoop mode, Terrier opens a new collection for each file split in HDFS 
+	 * @throws IOException */
+	public StreamCorpusCollection(InputStream input) throws IOException {		
 		files = new ArrayList<>();		
-		br = input instanceof CountingInputStream ? (CountingInputStream)input 
-				: new CountingInputStream(input);		
+		/*br = input instanceof CountingInputStream ? (CountingInputStream)input 
+				: new CountingInputStream(input);	*/
+
+		// open the first file, assuming the file is XZ-compressed. Must have some ways
+		// to do this more flexibly in the future
+		br = new CountingInputStream(new XZCompressorInputStream(input));	
+
+		transport = new TIOStreamTransport(br);
+
+		try {
+			transport.open();
+		} catch (TTransportException e) {
+			logger.error("Couldn't open file in the collection: ");
+			e.printStackTrace();
+			transport = null;
+		}
+
+		if (transport != null) {
+			tp = new TBinaryProtocol(transport);
+		}
+
 		item = new StreamItem();
 	}
-	
+
 	/**
 	 * Check whether it is the end of the collection
 	 * @return boolean
@@ -199,7 +219,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 				else if (! Files.canRead(filename)) {
 					logger.warn("Could not open "+filename+" : Cannot read");
 				} else {
-					
+
 					// support XZ compression
 					if (filename.endsWith(".xz")) {
 						br = new CountingInputStream(
