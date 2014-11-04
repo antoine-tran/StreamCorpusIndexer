@@ -91,11 +91,39 @@ public class StreamItemDocument implements Document {
 		}
 
 		private boolean endOfSentence() {
-			return (tokenCursor == curSentence.tokens.size());
+
+			// We've not yet checked any token of the sentence, assumming the sentence
+			// will not be empty, then we are not at the end of it.
+			if (tokenCursor == -1) {
+				return false;
+			}
+			if (curSentence != null && curSentence.tokens != null) {
+				return (tokenCursor == curSentence.tokens.size());
+			} 
+
+			// NOTE: Cases are that the whole document is empty (and so getNextTerm()
+			// will have to detect that)
+			else {
+				return false;
+			}
 		}
 
 		private boolean endOfSection() {
-			return (sentenceCursor == curSection.getSentencesSize());
+
+			// We've not yet checked any token of the sentence, assumming the sentence
+			// will not be empty, then we are not at the end of it.
+			if (sentenceCursor == -1) {
+				return false;
+			}
+			if (curSection != null) {
+				return (sentenceCursor == curSection.getSentencesSize());	
+			}
+			
+			// NOTE: Cases are that the whole document is empty (and so getNextTerm()
+			// will have to detect that)
+			else {
+				return false;
+			}
 		}
 
 		@Override
