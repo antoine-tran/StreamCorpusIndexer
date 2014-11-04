@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terrier.indexing.Document;
 
 import streamcorpus.ContentItem;
@@ -22,6 +24,7 @@ import streamcorpus.Token;
  */
 public class StreamItemDocument implements Document {
 
+	private static Logger logger = LoggerFactory.getLogger(StreamItemDocument.class);
 	/** 
 	 * The tokens of are organized in 3 dimensions: 
 	 * Sections, sentences in each field, and tokens in each sentences
@@ -188,8 +191,12 @@ public class StreamItemDocument implements Document {
 					tokenCheckState = 1;
 					return t;
 				}
-				else throw new RuntimeException("Invalid state when checking token: "
-						+ curToken + ", " + tokenCheckState);	
+				else {
+					
+					throw new RuntimeException("Invalid state when checking token: "
+							+ curToken + ", " + tokenCheckState);					
+				}
+						
 			}
 
 			// This happens only if the document is empty
@@ -307,7 +314,15 @@ public class StreamItemDocument implements Document {
 				else if (curSection == item.getBody()) {
 					return false;
 				}
-				else throw new RuntimeException("Unknown tagger: " + curTagger);
+				else {
+					// what to do if the body has no tagger ?
+					logger.info(" We are " + ((curSection == item.getBody()) ? " in body" : " not in body" ));
+					
+					logger.info("Taggers available: ");
+					for (String k : curSection.getSentences().keySet()) logger.info("[" + k + "]");
+					
+					throw new RuntimeException("Unknown tagger: " + curTagger);
+				}
 			}
 			else if (curTagger == TAGGER.Serif 
 					&& curSection.getSentences().containsKey("lingpipecounter")) {
