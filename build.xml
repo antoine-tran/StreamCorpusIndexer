@@ -157,7 +157,7 @@
 	  <zipgroupfileset dir="${local-lib.dir}" includes="*.jar"/>
 		<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
 		<manifest>
-		   <attribute name="Main-Class" value="de.l3s.streamcorpus.NewHadoopIndexing"/>
+		   <attribute name="Main-Class" value="de.l3s.streamcorpus.StreamCorpusIndexing"/>
 		</manifest>
 	</jar>
   </target>
