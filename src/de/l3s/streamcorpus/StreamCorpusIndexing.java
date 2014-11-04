@@ -109,11 +109,11 @@ import org.terrier.utility.io.HadoopUtility;
  * @since 2.2
 */
 @SuppressWarnings("deprecation")
-public class NewHadoopIndexing extends Configured implements Tool
+public class StreamCorpusIndexing extends Configured implements Tool
 {
 	static final int MAX_REDUCE = 26;
 	/** logger for this class */
-	protected static final Logger logger = Logger.getLogger(NewHadoopIndexing.class);
+	protected static final Logger logger = Logger.getLogger(StreamCorpusIndexing.class);
 	
 	/*private static String usage()
 	{
@@ -175,7 +175,7 @@ public class NewHadoopIndexing extends Configured implements Tool
 		if (jf == null)
 			throw new Exception("Could not get JobFactory from HadoopPlugin");
 		final JobConf conf = jf.newJob();
-		conf.setJarByClass(NewHadoopIndexing.class);
+		conf.setJarByClass(StreamCorpusIndexing.class);
 		conf.setJobName("terrierIndexing");
 		if (Files.exists(ApplicationSetup.TERRIER_INDEX_PATH) && Index.existsIndex(ApplicationSetup.TERRIER_INDEX_PATH, ApplicationSetup.TERRIER_INDEX_PREFIX))
 		{
@@ -277,7 +277,7 @@ public class NewHadoopIndexing extends Configured implements Tool
 	
 	public static void main(String[] args) {
 		try {
-			ToolRunner.run(new NewHadoopIndexing(), args);
+			ToolRunner.run(new StreamCorpusIndexing(), args);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
