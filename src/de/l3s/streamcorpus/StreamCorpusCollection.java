@@ -65,6 +65,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		files = new ArrayList<>();		
 		br = input instanceof CountingInputStream ? (CountingInputStream)input 
 				: new CountingInputStream(input);		
+		item = new StreamItem();
 	}
 	
 	/**
