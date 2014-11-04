@@ -184,7 +184,8 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			return 0;
 		}
 		
-		boolean blockIndexing = ApplicationSetup.BLOCK_INDEXING;
+		// boolean blockIndexing = ApplicationSetup.BLOCK_INDEXING;
+		boolean blockIndexing = true;
 		if (blockIndexing)
 		{
 			conf.setMapperClass(Hadoop_BlockSinglePassIndexer.class);
@@ -228,6 +229,10 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		}
 		specBR.close();
 		FileInputFormat.setInputPaths(conf,paths.toArray(new Path[paths.size()]));
+		
+		// not sure if this is effective in YARN
+		conf.setNumMapTasks(200);
+		
 		conf.setNumReduceTasks(numberOfReducers);
 		if (numberOfReducers> 1)
 		{
