@@ -24,7 +24,7 @@ import streamcorpus.Token;
  */
 public class StreamItemDocument implements Document {
 
-	private static Logger logger = LoggerFactory.getLogger(StreamItemDocument.class);
+	//private static Logger logger = LoggerFactory.getLogger(StreamItemDocument.class);
 	/** 
 	 * The tokens of are organized in 3 dimensions: 
 	 * Sections, sentences in each field, and tokens in each sentences
@@ -218,7 +218,6 @@ public class StreamItemDocument implements Document {
 
 		// Fetch the next token, and at the same time move the token cursor
 		private boolean internalNextToken() {			
-			logger.info("Fetch next token");
 			if (tokenCheckState == 0 && curToken != null) {
 				return true;
 			}
@@ -261,15 +260,9 @@ public class StreamItemDocument implements Document {
 		// and change curSentence and sentenceCursor at the same time
 		private boolean internalNextSentence() {
 
-			logger.info("Fetch next sentence");	
 			while (curSentence == null || curSentence.getTokens().size() == 0) {
 				if (curSentence == null || endOfSection()) {
-
-					if (curSentence == null)
-						logger.info("First time checking the sentence");
-					else if (endOfSection())
-						logger.info("Reach end of section. Move to the next section");
-					
+				
 					// NOTE: If internalNextSection() returns true, curTagger should never be null
 					if (!internalNextSection()) {
 						return false;
@@ -280,10 +273,11 @@ public class StreamItemDocument implements Document {
 				sentenceCursor++;
 				if (curTagger == TAGGER.Serif) {
 					curSentence = curSection.getSentences().get("serif").get(sentenceCursor);
+					return true;
 				} else if (curTagger == TAGGER.Lingpipe) {
 					curSentence = curSection.getSentences().get("lingpipecounter").get(sentenceCursor);
+					return true;
 				} else{
-					logger.warn("Unknown tagger: " + curTagger);
 					throw new RuntimeException("Unknown tagger: " + curTagger);
 				}
 			}
@@ -291,7 +285,6 @@ public class StreamItemDocument implements Document {
 		}
 
 		private boolean internalNextSection() {
-			logger.info("Fetch next sentence");	
 			if (endOfDocument()) {
 				return false;
 			}
@@ -304,16 +297,13 @@ public class StreamItemDocument implements Document {
 						&& metas.get("title").clean_visible.length() > 0) {
 					curSection = metas.get("title");					
 					titleOrBody = "title";
-					
-					logger.info("Get in title");
-					
+										
 				} else {
 					curSection = item.getBody();
 					if (curSection.clean_visible == null || curSection.clean_visible.length() == 0) {
 						return false;
 					}
 					titleOrBody = "body";
-					logger.info("Get in body section");
 				}
 				contentIndexed = false;
 				curTagger = null;
@@ -335,14 +325,7 @@ public class StreamItemDocument implements Document {
 					// what to do if the body has no tagger ? For the moment, skip it					
 					return false;
 				}
-				else {					
-					logger.info(" We are " + ((curSection == item.getBody()) ? " in body" : " not in body" ));
-					
-					logger.info("Taggers available: ");
-					for (String k : curSection.getSentences().keySet()) logger.info("[" + k + "]");
-					
-					logger.info("Raw text: " + curSection.clean_visible);
-					
+				else {										
 					throw new RuntimeException("Unknown tagger: " + curTagger);
 				}
 			}
