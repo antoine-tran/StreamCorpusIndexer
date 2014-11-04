@@ -127,7 +127,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 	public int run(String[] args) throws Exception {
 		long time = System.currentTimeMillis();
 			
-		// For the moment: Hard-code the terrier home
+		// For the moment: Hard-code the terrier home to quick test
 		System.setProperty("terrier.home", "/home/tuan.tran/executable/StreamCorpusIndexer");
 		
 		boolean docPartitioned = false;
