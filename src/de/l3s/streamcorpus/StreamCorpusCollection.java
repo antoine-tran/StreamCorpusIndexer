@@ -104,7 +104,6 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		if (!nextDocument()) {
 			return null;
 		}
-		logger.info("Current doc id: " + docId);
 		return getDocument();
 	}
 
@@ -161,7 +160,8 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 								continue scanning;
 							}
 							docId = item.getDoc_id();
-							
+							logger.info("Current doc id: " + docId);
+
 						} catch (TTransportException e) {				
 							int type = e.getType();
 							if (type == TTransportException.END_OF_FILE) {

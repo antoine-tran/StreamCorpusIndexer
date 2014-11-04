@@ -100,7 +100,7 @@ public class StreamItemDocument implements Document {
 			if (tokenCursor == -1) {
 				return false;
 			}
-			if (curSentence != null && curSentence.tokens != null) {
+			else if (curSentence != null && curSentence.tokens != null) {
 				return (tokenCursor == curSentence.tokens.size());
 			} 
 
@@ -198,9 +198,7 @@ public class StreamItemDocument implements Document {
 				}
 						
 			}
-
-			// This happens only if the document is empty
-			return null;
+			return t;
 		}
 
 		private void addField(EntityType type) {
@@ -220,6 +218,7 @@ public class StreamItemDocument implements Document {
 
 		// Fetch the next token, and at the same time move the token cursor
 		private boolean internalNextToken() {			
+			logger.info("Fetch next token");
 			if (tokenCheckState == 0 && curToken != null) {
 				return true;
 			}
@@ -262,14 +261,20 @@ public class StreamItemDocument implements Document {
 		// and change curSentence and sentenceCursor at the same time
 		private boolean internalNextSentence() {
 
+			logger.info("Fetch next sentence");	
 			while (curSentence == null || curSentence.getTokens().size() == 0) {
 				if (curSentence == null || endOfSection()) {
 
+					if (curSentence == null)
+						logger.info("First time checking the sentence");
+					else if (endOfSection())
+						logger.info("Reach end of section. Move to the next section");
+					
 					// NOTE: If internalNextSection() returns true, curTagger should never be null
 					if (!internalNextSection()) {
 						return false;
 					} else {
-						sentenceCursor = -1;
+						sentenceCursor = -1;						
 					}
 				}
 				sentenceCursor++;
@@ -278,6 +283,7 @@ public class StreamItemDocument implements Document {
 				} else if (curTagger == TAGGER.Lingpipe) {
 					curSentence = curSection.getSentences().get("lingpipecounter").get(sentenceCursor);
 				} else{
+					logger.warn("Unknown tagger: " + curTagger);
 					throw new RuntimeException("Unknown tagger: " + curTagger);
 				}
 			}
@@ -285,6 +291,7 @@ public class StreamItemDocument implements Document {
 		}
 
 		private boolean internalNextSection() {
+			logger.info("Fetch next sentence");	
 			if (endOfDocument()) {
 				return false;
 			}
@@ -297,12 +304,16 @@ public class StreamItemDocument implements Document {
 						&& metas.get("title").clean_visible.length() > 0) {
 					curSection = metas.get("title");					
 					titleOrBody = "title";
+					
+					logger.info("Get in title");
+					
 				} else {
 					curSection = item.getBody();
 					if (curSection.clean_visible == null || curSection.clean_visible.length() == 0) {
 						return false;
 					}
 					titleOrBody = "body";
+					logger.info("Get in body section");
 				}
 				contentIndexed = false;
 				curTagger = null;
@@ -354,6 +365,8 @@ public class StreamItemDocument implements Document {
 					return false;
 				}
 			}
-			else throw new RuntimeException("Unknown tagger transition (Old: " + curTagger + ")");
+			else {
+				throw new RuntimeException("Unknown tagger transition (Old: " + curTagger + ")");
+			}
 		}
 }
