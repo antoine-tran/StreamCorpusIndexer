@@ -191,6 +191,10 @@ public class StreamItemDocument implements Document {
 					tokenCheckState = 1;
 					return t;
 				}
+				else if (tokenCheckState == 1) {
+					
+				}
+				
 				else {
 					
 					throw new RuntimeException("Invalid state when checking token: "
@@ -222,7 +226,8 @@ public class StreamItemDocument implements Document {
 				return true;
 			}
 			else if (tokenCheckState == 1) {
-
+				tokenCheckState = -1;
+				
 				if (endOfSentence()) {
 
 					// if endOfSentence() returns true, the token 
@@ -230,8 +235,7 @@ public class StreamItemDocument implements Document {
 					if (!internalNextSentence()) {
 						return false;
 					} else {
-						tokenCursor = -1;
-						tokenCheckState = -1;
+						tokenCursor = -1;						
 					}
 				}
 				tokenCursor++;
