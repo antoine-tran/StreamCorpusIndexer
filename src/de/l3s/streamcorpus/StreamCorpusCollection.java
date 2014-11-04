@@ -131,8 +131,13 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		}
 
 		// load property
+		// Should have at least some properties from TRECCollection for compatibility
 		DocProperties = new HashMap<String, String>();
 		DocProperties.put("stream-id", item.getStream_id());
+		DocProperties.put("docno", docId);
+		DocProperties.put("offsetInFile", Long.toString(br.getPos()));
+		DocProperties.put("filename", currentFilename);
+		DocProperties.put("filenumber", Integer.toString(FileNumber));
 		DocProperties.put("url", item.getSchost());
 		DocProperties.put("type", item.getSource());
 		DocProperties.put("time", item.getStream_time().getZulu_timestamp());
