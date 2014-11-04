@@ -160,6 +160,10 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 						try {
 							item.read(tp);
 							
+							// detect if the document has at least one non-empty section
+							if (item.getBody().getClean_visible().isEmpty()) {
+								continue scanning;
+							}
 							docId = item.getDoc_id();
 							
 						} catch (TTransportException e) {				
