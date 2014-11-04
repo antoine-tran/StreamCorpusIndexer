@@ -32,9 +32,6 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 
 	private static final Logger logger = Logger.getLogger(StreamCorpusCollection.class);
 
-	/** Filename of current file */
-	protected String currentFilename;
-
 	/** properties for the current document */	
 	protected Map<String,String> DocProperties = null;
 	
@@ -126,7 +123,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		// the stream item should not be null
 		if (item == null) {
 			logger.warn("Moved to the next document but found an " +
-					"invalid stream item. Doc: " + currentFilename);
+					"invalid stream item. ");
 			return null;
 		}
 
@@ -136,7 +133,6 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		DocProperties.put("stream-id", item.getStream_id());
 		DocProperties.put("docno", docId);
 		DocProperties.put("offsetInFile", Long.toString(br.getPos()));
-		DocProperties.put("filename", currentFilename);
 		DocProperties.put("filenumber", Integer.toString(FileNumber));
 		DocProperties.put("url", item.getSchost());
 		DocProperties.put("type", item.getSource());
@@ -177,10 +173,14 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 								}
 							}
 						} catch (TException e) {
-							logger.warn("Error reading " + files.get(FileNumber)
-									+ ": " + currentFilename 
-									+ ". Skip the rest..");
-							continue scanning;
+							logger.warn("Error reading . Skip the rest..");
+							e.printStackTrace();
+							if (openNextFile()) {
+								continue scanning;
+							} else {
+								endOfCollection = true;
+								return false;
+							}
 						}			
 
 					} else if (openNextFile()) {
@@ -190,8 +190,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 						return false;
 					}
 				} catch (IOException e) {
-					logger.warn("Error reading " + files.get(FileNumber)
-							+ ": " + currentFilename + ". Skip");
+					logger.warn("Error reading. Skip");
 					continue scanning;
 				}
 				bScanning = false;
@@ -204,8 +203,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 			return false;
 		}
 		else {
-			throw new RuntimeException("Error getting next doc in file "
-					+ currentFilename);
+			throw new RuntimeException("Error getting next doc in file ");
 		}
 	}
 
@@ -258,7 +256,6 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 
 					if (transport != null) {
 						tp = new TBinaryProtocol(transport);
-						currentFilename = filename;
 						tryFile = false;
 						rtr = true;
 					}
