@@ -151,7 +151,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 
 				try {
 					// value
-					if (tp == null) {
+					if (tp != null) {
 						try {
 							item.read(tp);
 							
