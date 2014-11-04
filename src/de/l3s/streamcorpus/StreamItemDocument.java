@@ -97,7 +97,7 @@ public class StreamItemDocument implements Document {
 
 			// We've not yet checked any token of the sentence, assumming the sentence
 			// will not be empty, then we are not at the end of it.
-			if (tokenCursor == -1) {
+			if (tokenCursor == -1 || curSentence == null) {
 				return false;
 			}
 			else if (curSentence != null && curSentence.tokens != null) {
@@ -121,7 +121,7 @@ public class StreamItemDocument implements Document {
 			if (curSection != null) {
 				return (sentenceCursor == curSection.getSentencesSize());	
 			}
-			
+
 			// NOTE: Cases are that the whole document is empty (and so getNextTerm()
 			// will have to detect that)
 			else {
@@ -162,6 +162,21 @@ public class StreamItemDocument implements Document {
 			return properties;
 		}
 
+		private void addField(EntityType type) {
+			if (type == EntityType.PER) curFields.add((curTagger == TAGGER.Serif) 
+					? INDEXABLE.Serif_PER.toString()
+							: INDEXABLE.Lingpipe_PER.toString());
+			if (type == EntityType.ORG) curFields.add((curTagger == TAGGER.Serif) 
+					? INDEXABLE.Serif_ORG.toString()
+							: INDEXABLE.Lingpipe_ORG.toString());
+			if (type == EntityType.LOC) curFields.add((curTagger == TAGGER.Serif) 
+					? INDEXABLE.Serif_LOC.toString()
+							: INDEXABLE.Lingpipe_LOC.toString());
+			if (type == EntityType.MISC) curFields.add((curTagger == TAGGER.Serif) 
+					? INDEXABLE.Serif_MISC.toString()
+							: INDEXABLE.Lingpipe_MISC.toString());
+		}
+
 		@Override
 		// Order of traversing: title, anchor, raw, serif
 		// Lazy move of cursors in 3 dimensions in-side out
@@ -190,34 +205,13 @@ public class StreamItemDocument implements Document {
 					t = curToken.getToken();
 					tokenCheckState = 1;
 					return t;
-				}
-				else if (tokenCheckState == 1) {
-					
-				}
-				
-				else {
-					
+				}				
+				else {					
 					throw new RuntimeException("Invalid state when checking token: "
 							+ curToken + ", " + tokenCheckState);					
 				}
-						
 			}
 			return t;
-		}
-
-		private void addField(EntityType type) {
-			if (type == EntityType.PER) curFields.add((curTagger == TAGGER.Serif) 
-					? INDEXABLE.Serif_PER.toString()
-							: INDEXABLE.Lingpipe_PER.toString());
-			if (type == EntityType.ORG) curFields.add((curTagger == TAGGER.Serif) 
-					? INDEXABLE.Serif_ORG.toString()
-							: INDEXABLE.Lingpipe_ORG.toString());
-			if (type == EntityType.LOC) curFields.add((curTagger == TAGGER.Serif) 
-					? INDEXABLE.Serif_LOC.toString()
-							: INDEXABLE.Lingpipe_LOC.toString());
-			if (type == EntityType.MISC) curFields.add((curTagger == TAGGER.Serif) 
-					? INDEXABLE.Serif_MISC.toString()
-							: INDEXABLE.Lingpipe_MISC.toString());
 		}
 
 		// Fetch the next token, and at the same time move the token cursor
@@ -227,7 +221,7 @@ public class StreamItemDocument implements Document {
 			}
 			else if (tokenCheckState == 1) {
 				tokenCheckState = -1;
-				
+				tokenCursor++;
 				if (endOfSentence()) {
 
 					// if endOfSentence() returns true, the token 
@@ -238,22 +232,29 @@ public class StreamItemDocument implements Document {
 						tokenCursor = -1;						
 					}
 				}
-				tokenCursor++;
 				curToken = curSentence.getTokens().get(tokenCursor);
 				return true;
 			}
 
 			// Check StreamItem for the first time
 			else if (tokenCheckState == -1 || curToken == null) {
+				tokenCheckState = -1;
 				if (!internalNextSentence()) {
 					return false;
 				} else {
 					tokenCursor = -1;
-					tokenCheckState = -1;
 				}
 				tokenCursor++;
-				curToken = curSentence.getTokens().get(tokenCursor);
-				return true;
+				// always check the end-of-sentence again before assigning values
+				if (!endOfSentence()) {
+					curToken = curSentence.getTokens().get(tokenCursor);
+					return true;
+				}
+
+				// wtf, current sentence if empty
+				else {
+					return false;
+				}
 			}
 
 			else throw new RuntimeException("Error fetching the next token: "
@@ -264,9 +265,9 @@ public class StreamItemDocument implements Document {
 		// and change curSentence and sentenceCursor at the same time
 		private boolean internalNextSentence() {
 
-			while (curSentence == null || curSentence.getTokens().size() == 0) {
+			while (curSentence == null || curSentence.getTokens().size() == 0 || !endOfSection()) {
 				if (curSentence == null || endOfSection()) {
-				
+
 					// NOTE: If internalNextSection() returns true, curTagger should never be null
 					if (!internalNextSection()) {
 						return false;
@@ -275,15 +276,33 @@ public class StreamItemDocument implements Document {
 					}
 				}
 				sentenceCursor++;
-				if (curTagger == TAGGER.Serif) {
-					curSentence = curSection.getSentences().get("serif").get(sentenceCursor);
-					return true;
+
+				// Check end-of-section once again
+				if (curTagger == TAGGER.Serif) {	
+					if (sentenceCursor < curSection.getSentences().get("serif").size()) {
+						curSentence = curSection.getSentences().get("serif").get(sentenceCursor);
+						if (curSentence != null && curSentence.getTokens().size() > 0) {
+							return true;
+						}
+					} else {
+						continue;
+					}
+					
 				} else if (curTagger == TAGGER.Lingpipe) {
-					curSentence = curSection.getSentences().get("lingpipecounter").get(sentenceCursor);
-					return true;
-				} else{
+					if (sentenceCursor < curSection.getSentences().get("lingpipecounter").size()) {
+						curSentence = curSection.getSentences().get("lingpipecounter").get(sentenceCursor);
+						if (curSentence != null && curSentence.getTokens().size() > 0) {
+							return true;
+						}
+					}
+					else {
+						continue;
+					}
+					
+				} else {
 					throw new RuntimeException("Unknown tagger: " + curTagger);
-				}
+				}	
+
 			}
 			return false;
 		}
@@ -301,7 +320,7 @@ public class StreamItemDocument implements Document {
 						&& metas.get("title").clean_visible.length() > 0) {
 					curSection = metas.get("title");					
 					titleOrBody = "title";
-										
+
 				} else {
 					curSection = item.getBody();
 					if (curSection.clean_visible == null || curSection.clean_visible.length() == 0) {
@@ -313,9 +332,8 @@ public class StreamItemDocument implements Document {
 				curTagger = null;
 			}
 			if (curTagger == null) {
-				
-				// if in title and there is 
-				
+
+
 				if (curSection.getSentences().containsKey("serif")) {
 					curTagger = TAGGER.Serif;
 					return true;
@@ -325,7 +343,7 @@ public class StreamItemDocument implements Document {
 					return true;
 				}
 				else if (curSection == item.getBody()) {
-					
+
 					// what to do if the body has no tagger ? For the moment, skip it					
 					return false;
 				}
