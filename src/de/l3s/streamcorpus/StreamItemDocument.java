@@ -303,6 +303,9 @@ public class StreamItemDocument implements Document {
 				curTagger = null;
 			}
 			if (curTagger == null) {
+				
+				// if in title and there is 
+				
 				if (curSection.getSentences().containsKey("serif")) {
 					curTagger = TAGGER.Serif;
 					return true;
@@ -320,6 +323,8 @@ public class StreamItemDocument implements Document {
 					
 					logger.info("Taggers available: ");
 					for (String k : curSection.getSentences().keySet()) logger.info("[" + k + "]");
+					
+					logger.info("Raw text: " + curSection.clean_visible);
 					
 					throw new RuntimeException("Unknown tagger: " + curTagger);
 				}
