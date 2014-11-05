@@ -233,6 +233,10 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		// not sure if this is effective in YARN
 		conf.setNumMapTasks(2000);
 		
+		// increase the yarn memory to 10 GB
+		conf.set("yarn.nodemanager.resource.memory-mb", "12288");
+		conf.set("yarn.nodemanager.resource.cpu-vcores", "16");
+		
 		conf.setNumReduceTasks(numberOfReducers);
 		if (numberOfReducers> 1)
 		{
