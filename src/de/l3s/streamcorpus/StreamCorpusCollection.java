@@ -1,5 +1,6 @@
 package de.l3s.streamcorpus;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.terrier.indexing.Collection;
 import org.terrier.indexing.Document;
+import org.terrier.indexing.TaggedDocument;
+import org.terrier.utility.ApplicationSetup;
 import org.terrier.utility.Files;
 import org.terrier.utility.io.CountingInputStream;
 
@@ -34,7 +37,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 
 	/** properties for the current document */	
 	protected Map<String,String> DocProperties = null;
-	
+
 	/** current doc id */
 	private String docId;
 
@@ -57,8 +60,28 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 	private TTransport transport;
 	private TBinaryProtocol tp;
 
+	protected Class<? extends Document> documentClass;
+
 	/** Underlying reading streams */
 	private CountingInputStream is;
+
+	/** In local mode, Terrier opens a collection.spec file and cache every paths into memory */
+	public StreamCorpusCollection() {
+		this(ApplicationSetup.COLLECTION_SPEC);
+	}
+
+	public StreamCorpusCollection(String collectionSpecFile) {
+		loadDocumentClass();		
+		readCollectionSpec(collectionSpecFile);
+		//open the first file
+		try {
+			openNextFile();
+		} catch (IOException ioe) {
+			logger.error("IOException opening first file of collection "
+					+ "- is the collection.spec correct?", ioe);
+		}
+		item = new StreamItem();
+	}
 
 	/** In Hadoop mode, Terrier opens a new collection for each file split in HDFS 
 	 * @throws IOException */
@@ -86,6 +109,37 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 		}
 
 		item = new StreamItem();
+	}
+
+	/** Loads the class that will supply all documents for this Collection.
+	 * Set by property <tt>trec.document.class</tt>
+	 */
+	protected void loadDocumentClass() {
+		try{
+			documentClass = Class.forName(ApplicationSetup.getProperty("trec.document.class", TaggedDocument.class.getName())).asSubclass(Document.class);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	protected void readCollectionSpec(String CollectionSpecFilename)
+	{
+		//reads the collection specification file
+		try {
+			BufferedReader br2 = Files.openFileReader(CollectionSpecFilename);
+			String filename = null;
+			files = new ArrayList<String>();
+			while ((filename = br2.readLine()) != null) {
+				filename = filename.trim();
+				if (!filename.startsWith("#") && !filename.equals(""))
+					files.add(filename);
+			}
+			br2.close();
+			logger.info("TRECCollection read collection specification ("+files.size()+" files)");
+		} catch (IOException ioe) {
+			logger.error("Input output exception while loading the collection.spec file. "
+					+ "("+CollectionSpecFilename+")", ioe);
+		}
 	}
 
 	/**
@@ -154,18 +208,19 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 					if (tp != null) {
 						try {
 							item.read(tp);
-							
+
 							// detect if the document has at least one non-empty section
 							if (item.getBody().getClean_visible().isEmpty()) {
 								continue scanning;
 							}
 							docId = item.getDoc_id();
 							logger.info("Current doc id: " + docId);
-
+							
 						} catch (TTransportException e) {				
 							int type = e.getType();
 							if (type == TTransportException.END_OF_FILE) {
-								if (openNextFile()) {
+								logger.info("Reaching end of file");
+								if (openNextFile()) {									
 									continue scanning;
 								} else {
 									endOfCollection = true;

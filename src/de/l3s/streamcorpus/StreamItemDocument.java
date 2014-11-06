@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terrier.indexing.Document;
 
 import streamcorpus.ContentItem;
@@ -36,6 +34,9 @@ public class StreamItemDocument implements Document {
 	private Sentence curSentence;
 	private int sentenceCursor;
 
+	/** control flag to check the end of the document */
+	private boolean EOD;
+	
 	private Token curToken;
 	private int tokenCursor;
 
@@ -74,6 +75,7 @@ public class StreamItemDocument implements Document {
 		public StreamItemDocument(StreamItem item, Map<String, String> docProps) {
 			this.item = item;
 			this.properties = docProps;
+			this.EOD = false;
 
 			curFields = new HashSet<>();
 			tokenCursor = -1;
@@ -89,8 +91,9 @@ public class StreamItemDocument implements Document {
 		}
 
 		@Override
-		public boolean endOfDocument() {		
-			return (endOfSentence() && endOfSection() && (curSection == item.getBody()));
+		public boolean endOfDocument() {	
+			return EOD;
+			// return (endOfSentence() && endOfSection() && (curSection == item.getBody()));
 		}
 
 		private boolean endOfSentence() {
@@ -101,7 +104,11 @@ public class StreamItemDocument implements Document {
 				return false;
 			}
 			else if (curSentence != null && curSentence.tokens != null) {
-				return (tokenCursor == curSentence.tokens.size());
+				boolean check = (tokenCursor == curSentence.tokens.size());
+				if (check == true && item.getDoc_id().equals("4ea2f241d6e1bd8a33c9a9436bb73c72")) {
+					System.out.println("Another sentence finished.");
+				}
+				return check;
 			} 
 
 			// NOTE: Cases are that the whole document is empty (and so getNextTerm()
@@ -237,9 +244,12 @@ public class StreamItemDocument implements Document {
 			}
 
 			// Check StreamItem for the first time
-			else if (tokenCheckState == -1 || curToken == null) {
+			else if (tokenCheckState == -1 && curToken == null) {
 				tokenCheckState = -1;
+				
+				// no sentence more also means the end of the document
 				if (!internalNextSentence()) {
+					tokenCursor = 0;
 					return false;
 				} else {
 					tokenCursor = -1;
@@ -256,6 +266,11 @@ public class StreamItemDocument implements Document {
 					return false;
 				}
 			}
+			
+			// Check new sentence
+			else if (tokenCheckState == -1 && curToken != null) {
+				return true;
+			}
 
 			else throw new RuntimeException("Error fetching the next token: "
 					+ curToken + ", " + tokenCheckState);
@@ -265,14 +280,17 @@ public class StreamItemDocument implements Document {
 		// and change curSentence and sentenceCursor at the same time
 		private boolean internalNextSentence() {
 
-			while (curSentence == null || curSentence.getTokens().size() == 0 || !endOfSection()) {
+			// while (curSentence == null || curSentence.getTokens().size() == 0) {
+			while (true) {
+							
 				if (curSentence == null || endOfSection()) {
 
 					// NOTE: If internalNextSection() returns true, curTagger should never be null
 					if (!internalNextSection()) {
+						EOD = true;
 						return false;
 					} else {
-						sentenceCursor = -1;						
+						sentenceCursor = -1;
 					}
 				}
 				sentenceCursor++;
@@ -294,17 +312,14 @@ public class StreamItemDocument implements Document {
 						if (curSentence != null && curSentence.getTokens().size() > 0) {
 							return true;
 						}
-					}
-					else {
+					} else {
 						continue;
 					}
 					
 				} else {
 					throw new RuntimeException("Unknown tagger: " + curTagger);
 				}	
-
 			}
-			return false;
 		}
 
 		private boolean internalNextSection() {
