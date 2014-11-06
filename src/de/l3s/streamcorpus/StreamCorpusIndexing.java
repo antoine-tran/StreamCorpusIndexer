@@ -225,6 +225,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		{
 			if (line.startsWith("#"))
 				continue;
+			System.out.println(lien);
 			paths.add(new Path(line));
 		}
 		specBR.close();
