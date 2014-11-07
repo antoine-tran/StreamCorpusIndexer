@@ -111,7 +111,7 @@ public class CompressingMetaIndex implements MetaIndex {
 			jc.set(STRUCTURE_NAME_JC_KEY, metaStructureName);
 		}
 		
-		static class MetaIndexSplit extends FileSplit
+		public static class MetaIndexSplit extends FileSplit
 		{
 			int startId;
 			int endId;
