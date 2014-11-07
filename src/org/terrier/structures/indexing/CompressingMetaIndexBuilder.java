@@ -51,9 +51,8 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.lib.NullOutputFormat;
 import org.apache.log4j.Logger;
-
+import org.terrier.structures.CompressingMetaIndexInputFormat;
 import org.terrier.structures.Index;
-import org.terrier.structures.CompressingMetaIndex.CompressingMetaIndexInputFormat;
 import org.terrier.structures.IndexOnDisk;
 import org.terrier.structures.collections.FSOrderedMapFile;
 import org.terrier.structures.collections.FSOrderedMapFile.MapFileWriter;
