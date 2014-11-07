@@ -264,10 +264,10 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			e.printStackTrace();
 			ranOK = false;
 		}
-		/*if (jobId != null)
+		if (jobId != null)
 		{
 			deleteTaskFiles(ApplicationSetup.TERRIER_INDEX_PATH, jobId);
-		}*/
+		}
 		if (ranOK)
 		{
 			if (! docPartitioned)
