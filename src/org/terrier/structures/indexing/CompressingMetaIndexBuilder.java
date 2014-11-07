@@ -366,6 +366,8 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 	{		
 		long time =System.currentTimeMillis();
 		final JobConf conf = jf.newJob();
+		
+		conf.setJarByClass(CompressingMetaIndexBuilder.class);
 		conf.setJobName("Reverse MetaIndex");
 		conf.setMapOutputKeyClass(KeyValueTuple.class);
 		conf.setMapOutputValueClass(IntWritable.class);
