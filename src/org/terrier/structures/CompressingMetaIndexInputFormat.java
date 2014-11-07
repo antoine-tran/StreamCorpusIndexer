@@ -147,8 +147,12 @@ public class CompressingMetaIndexInputFormat implements InputFormat<IntWritable,
 		List<InputSplit> splits = new ArrayList<InputSplit>(advisedNumberOfSplits);
 		IndexOnDisk index = HadoopUtility.fromHConfiguration(jc);
 		String structureName = jc.get(STRUCTURE_NAME_JC_KEY);
+		
+		// Change this to new structures in yarn
 		final String dataFilename = index.getPath() + ApplicationSetup.FILE_SEPARATOR + index.getPrefix() + "." + structureName + ".zdata";
 		final String indxFilename = index.getPath() + ApplicationSetup.FILE_SEPARATOR + index.getPrefix() + "." + structureName + ".idx";
+		
+		
 		final DataInputStream idx = new DataInputStream(Files.openFileStream(indxFilename));
 		FileSystem fSys = FileSystem.get(jc);
 		FileStatus fs = fSys.getFileStatus(new Path(dataFilename));
