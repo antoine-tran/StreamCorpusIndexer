@@ -513,7 +513,6 @@ public class Hadoop_BasicSinglePassIndexer
 		
 		final String indexDestinationPrefix = jc.get("indexing.hadoop.prefix", "data");
 		reduceId = TaskAttemptID.forName(jc.get("mapred.task.id")).getTaskID().getId();
-		logger.info(indexDestination.toString());
 		mutipleIndices = jc.getBoolean("indexing.hadoop.multiple.indices", true);
 		if (jc.getNumReduceTasks() > 1)
 		{
@@ -542,13 +541,9 @@ public class Hadoop_BasicSinglePassIndexer
 		final LinkedList<MapData> runData = new LinkedList<MapData>();
 		DataInputStream runDataIn;
 	
-		
-		String outputpath = FileOutputFormat.getOutputPath(jc).toString();
 		final String jobId = TaskAttemptID.forName(jc.get("mapred.task.id")).getJobID().toString().replaceAll("job",
 				"task");
-		
-		logger.info("This reduce is working with map task " + jobId);
-		
+				
 		/*final FileStatus[] files = FileSystem.get(jc).listStatus(
 			new Path(outputpath + "/" + jobId), 
 			new org.apache.hadoop.fs.PathFilter()
@@ -621,7 +616,6 @@ public class Hadoop_BasicSinglePassIndexer
 	
 	// A very dirty trick that recursively read files in index, and ignore the temporary reduce files
 	private void recursiveListStatus(FileSystem fs, Path p, PathFilter pf, List<FileStatus> output) throws IOException {
-		logger.info("Check run file at " + p.toString());
 		FileStatus[] tmpRes = fs.listStatus(p, pf);
 		if (tmpRes != null && tmpRes.length > 0) {
 			for (FileStatus status : tmpRes) output.add(status);
@@ -633,7 +627,6 @@ public class Hadoop_BasicSinglePassIndexer
 				if (subname.contains("_r_")) {
 					continue;
 				}
-				logger.info("Sub-dir: " + status.getPath().toString());
 				recursiveListStatus(fs, status.getPath(), pf, output);
 			}
 		}

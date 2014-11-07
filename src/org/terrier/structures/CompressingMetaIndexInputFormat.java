@@ -188,6 +188,9 @@ public class CompressingMetaIndexInputFormat implements InputFormat<IntWritable,
 		{
 			blockSizeSoFar = lastRead - startingBlockLocation;
 			final String[] hosts = getHosts(fs, fSys, startingBlockLocation, blockSizeSoFar);
+			
+			logger.info("Create new MetaIndexSplit with start = " + startingId + ", end = " + currentId);
+			
 			MetaIndexSplit s = new MetaIndexSplit(new Path(dataFilename), startingBlockLocation, blockSizeSoFar, hosts, startingId, currentId-1);
 			logger.debug("Got last split: "+ s);
 			splits.add(s);
