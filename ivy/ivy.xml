@@ -23,7 +23,6 @@
                                         
     <!-- Support compressions -->    
     <dependency org="org.apache.commons" name="commons-compress" rev="1.5" conf="*->*,!sources,!javadoc" />
-    <dependency org="org.utgenome.thirdparty" name="picard" rev="1.86.0" conf="*->*,!sources,!javadoc" />
     
     
     <!-- Thrift for Java -->
@@ -33,7 +32,7 @@
     <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.1" conf="*->*,!sources,!javadoc" />
     <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.1" conf="*->*,!sources,!javadoc" />
     <dependency org="net.sf.trove4j" name="trove4j" rev="2.0.2" conf="*->*,!sources,!javadoc"/>
-    
+    <dependency org="fastutil" name="fastutil" rev="5.0.9" conf="*->*,!sources,!javadoc" />
     
   </dependencies>
 </ivy-module>
