@@ -176,7 +176,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			throw new Exception("Could not get JobFactory from HadoopPlugin");
 		final JobConf conf = jf.newJob();
 		conf.setJarByClass(StreamCorpusIndexing.class);
-		conf.setJobName("terrierIndexing");
+		conf.setJobName("StreamCorpusIndexer: Terrier Indexing");
 		if (Files.exists(ApplicationSetup.TERRIER_INDEX_PATH) && Index.existsIndex(ApplicationSetup.TERRIER_INDEX_PATH, ApplicationSetup.TERRIER_INDEX_PREFIX))
 		{
 			logger.fatal("Cannot index while index exists at "
