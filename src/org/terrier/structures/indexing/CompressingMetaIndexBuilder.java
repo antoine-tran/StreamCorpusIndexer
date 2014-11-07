@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.Deflater;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -50,6 +51,8 @@ import org.apache.hadoop.mapred.Partitioner;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.lib.NullOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 import org.terrier.structures.CompressingMetaIndexInputFormat;
 import org.terrier.structures.Index;
@@ -327,7 +330,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 	}
 
 	public static void main(String[] args) throws Exception
-	{
+	{		
 		if (args.length == 0)
 		{
 			System.err.println("Usage: -Dterrier.index.path=hdfs://path/to/index " + CompressingMetaIndexBuilder.class.getName() + " docno");
@@ -642,5 +645,4 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 				);*/
 		}
 	}
-
 }
