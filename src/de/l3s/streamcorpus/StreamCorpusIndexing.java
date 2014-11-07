@@ -264,10 +264,10 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			e.printStackTrace();
 			ranOK = false;
 		}
-		if (jobId != null)
+		/*if (jobId != null)
 		{
 			deleteTaskFiles(ApplicationSetup.TERRIER_INDEX_PATH, jobId);
-		}
+		}*/
 		if (ranOK)
 		{
 			if (! docPartitioned)
@@ -400,7 +400,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		}
 		IndexUtil.deleteStructure(dest, tmpLexiconStructure + "-valuefactory");
 		
-		//6. update destimation index
+		//6. update destination index
 		
 		if (FieldScore.FIELDS_COUNT > 0)
 			dest.addIndexStructure("lexicon-valuefactory", FieldLexiconEntry.Factory.class.getName(), "java.lang.String", "${index.inverted.fields.count}");
