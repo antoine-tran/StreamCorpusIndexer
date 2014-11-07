@@ -1,8 +1,6 @@
 package org.terrier.structures;
 
-import java.io.DataInput;
 import java.io.DataInputStream;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,7 +12,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
@@ -24,7 +21,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.terrier.structures.CompressingMetaIndex.InputStream;
 import org.terrier.utility.ApplicationSetup;
-import org.terrier.utility.ArrayUtils;
 import org.terrier.utility.Files;
 import org.terrier.utility.Wrapper;
 import org.terrier.utility.io.HadoopUtility;
