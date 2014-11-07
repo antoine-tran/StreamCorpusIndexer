@@ -102,6 +102,11 @@ public class CompressingMetaIndexInputFormat implements InputFormat<IntWritable,
 	{
 		HadoopUtility.loadTerrierJob(jc);
 		
+		logger.info("load split from :");
+		for (String s :  _split.getLocations()) {
+			logger.info(s);
+		}
+		
 		//load the index
 		Index.setIndexLoadingProfileAsRetrieval(false);
 		IndexOnDisk index = HadoopUtility.fromHConfiguration(jc);
