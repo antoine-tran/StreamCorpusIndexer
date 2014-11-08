@@ -282,7 +282,8 @@ public class LexiconBuilder
 				"${max.term.length}"
 				);
 		if (this.index.getIndexProperty("max.term.length", null) == null)
-			this.index.setIndexProperty("max.term.length", ApplicationSetup.getProperty("max.term.length", ""+20));
+			this.index.setIndexProperty("max.term.length", ApplicationSetup.getProperty("max.term.length", "2000"));
+			// this.index.setIndexProperty("max.term.length", "2000");
 		this.index.addIndexStructure(defaultStructureName+"-valuefactory", lexiconEntryFactoryValueClass+"$Factory", "", "");
 		valueFactory = (FixedSizeWriteableFactory<LexiconEntry>)this.index.getIndexStructure(defaultStructureName+"-valuefactory");
 		lexiconOutputStream = LexiconOutputStream.class;

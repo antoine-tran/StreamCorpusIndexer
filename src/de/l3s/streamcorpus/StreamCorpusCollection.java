@@ -197,7 +197,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 	public boolean nextDocument() {
 		//move the stream to the start of the next document
 		//try next file if error / eof encountered. (and set endOfCollection if
-		// needed)
+		// needed) max.term.length indexer.meta.forward.keylens
 		boolean bScanning = true;
 		scanning:
 			while (bScanning) {
@@ -213,7 +213,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 								continue scanning;
 							}
 							docId = item.getDoc_id();
-							logger.info("Current doc id: " + docId);
+							logger.debug("Current doc id: " + docId);
 							
 						} catch (TTransportException e) {				
 							int type = e.getType();

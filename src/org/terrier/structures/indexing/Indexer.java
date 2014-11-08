@@ -223,7 +223,7 @@ public abstract class Indexer
 	protected MetaIndexBuilder createMetaIndexBuilder()
 	{
 		final String[] forwardMetaKeys = ApplicationSetup.getProperty("indexer.meta.forward.keys", "docno").split("\\s*,\\s*");
-		final int[] metaKeyLengths = parseInts(ApplicationSetup.getProperty("indexer.meta.forward.keylens", "20").split("\\s*,\\s*"));
+		final int[] metaKeyLengths = parseInts(ApplicationSetup.getProperty("indexer.meta.forward.keylens", "2000").split("\\s*,\\s*"));
 		final String[] reverseMetaKeys = ApplicationSetup.getProperty("indexer.meta.reverse.keys", "").split("\\s*,\\s*");
 		return new CompressingMetaIndexBuilder(currentIndex, forwardMetaKeys, metaKeyLengths, reverseMetaKeys);
 	}

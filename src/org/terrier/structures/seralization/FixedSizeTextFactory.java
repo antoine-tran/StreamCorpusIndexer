@@ -114,7 +114,7 @@ public class FixedSizeTextFactory implements FixedSizeWriteableFactory<Text> {
 	 */
 	public static int getMaximumTextLength(int charCount)
 	{
-		return WritableUtils.getVIntSize(charCount) + 3*charCount;
+		return Math.max(WritableUtils.getVIntSize(charCount) + 3*charCount, 200);
 	}
 
 	

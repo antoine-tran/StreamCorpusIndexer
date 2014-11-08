@@ -393,7 +393,8 @@ public class BasicSinglePassIndexer extends BasicIndexer{
 	 */
 	public void performMultiWayMerge() throws IOException {
 		String[][] _fileNames = getFileNames();
-		this.currentIndex.setIndexProperty("max.term.length", ApplicationSetup.getProperty("max.term.length", ""+20));
+		// this.currentIndex.setIndexProperty("max.term.length", ApplicationSetup.getProperty("max.term.length", ""+20));
+		this.currentIndex.setIndexProperty("max.term.length", ApplicationSetup.getProperty("max.term.length", "2000"));
 		LexiconOutputStream<String> lexStream = new FSOMapFileLexiconOutputStream(this.currentIndex, "lexicon", 
 				(super.numFields > 0 ? FieldLexiconEntry.Factory.class : BasicLexiconEntry.Factory.class));
 		

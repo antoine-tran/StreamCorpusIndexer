@@ -487,7 +487,7 @@ public class ApplicationSetup {
 		//BUNDLE_SIZE = Integer.parseInt(getProperty("bundle.size", "2000"));
 		
 		//the maximum size of a term (string)
-		MAX_TERM_LENGTH = Integer.parseInt(getProperty("max.term.length", "20"));
+		MAX_TERM_LENGTH = Integer.parseInt(getProperty("max.term.length", "2000"));
 
 		//the maximum number of bytes used to store a document number.
 		//DOCNO_BYTE_LENGTH = Integer.parseInt(getProperty("docno.byte.length", "20"));	
