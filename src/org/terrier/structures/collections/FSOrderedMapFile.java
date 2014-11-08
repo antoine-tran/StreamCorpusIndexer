@@ -1153,10 +1153,15 @@ public class FSOrderedMapFile<
             public void write(WritableComparable key, Writable value)
                 throws IOException
             {
+            	// ignore IndexOutOfBoundError, which means the term is too long
+            	try {
             	//System.err.println("writing key "+ key.toString());
                 key.write(out);
                 //System.err.println("writing value "+ value.toString());
                 value.write(out);
+            	} catch (ArrayIndexOutOfBoundsException aioobe) {
+            		logger.warn("Term too long (previous error), skipped");
+            	}
             }
             
             public void close() throws IOException
