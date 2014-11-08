@@ -208,6 +208,11 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 						try {
 							item.read(tp);
 
+							// This happens in chunk 2011-12-13: body is null !!
+							if (item.getBody() == null) {
+								continue scanning;
+							}
+							
 							// detect if the document has at least one non-empty section
 							if (item.getBody().getClean_visible().isEmpty()) {
 								continue scanning;
