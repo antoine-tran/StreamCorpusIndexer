@@ -230,6 +230,7 @@ public class FSOrderedMapFile<
                 value.readFields(di);
                 counter++;
             } catch (IOException ioe) {
+            	ioe.printStackTrace();
                 logger.error("IOException while iterating", ioe); 
                 throw new NoSuchElementException("IOException while iterating");
             }
