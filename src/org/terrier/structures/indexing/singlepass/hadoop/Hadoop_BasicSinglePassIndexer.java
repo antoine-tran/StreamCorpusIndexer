@@ -49,6 +49,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.TaskAttemptID;
+import org.apache.hadoop.util.ToolRunner;
 import org.terrier.compression.bit.BitIn;
 import org.terrier.compression.bit.BitOutputStream;
 import org.terrier.indexing.Document;
@@ -154,7 +155,12 @@ public class Hadoop_BasicSinglePassIndexer
 			{
 				throw new IOException("No such index ["+destinationIndexPath+","+ApplicationSetup.TERRIER_INDEX_PREFIX+"]");
 			}
-			CompressingMetaIndexBuilder.reverseAsMapReduceJob(index, "meta", reverseMetaKeys, jf);
+			
+			
+			// CompressingMetaIndexBuilder.reverseAsMapReduceJob(index, "meta", reverseMetaKeys, jf);
+			JobConf jc = jf.newJob();
+			ToolRunner.run(new CompressingMetaIndexBuilder(index, reverseMetaKeys, jc), reverseMetaKeys);
+			
 			index.close();
 			return;
 		}
@@ -168,7 +174,9 @@ public class Hadoop_BasicSinglePassIndexer
 					public void run() {
 						try{
 							IndexOnDisk index = Index.createIndex(destinationIndexPath, ApplicationSetup.TERRIER_INDEX_PREFIX+"-"+id);
-							CompressingMetaIndexBuilder.reverseAsMapReduceJob(index, "meta", reverseMetaKeys, jf);
+							JobConf forkedJc = jf.newJob();
+							// CompressingMetaIndexBuilder.reverseAsMapReduceJob(index, "meta", reverseMetaKeys, jf);
+							ToolRunner.run(new CompressingMetaIndexBuilder(index, reverseMetaKeys, forkedJc), reverseMetaKeys);
 							index.close();
 						} catch (Exception e) {
 							logger.error("Problem finishing meta", e);

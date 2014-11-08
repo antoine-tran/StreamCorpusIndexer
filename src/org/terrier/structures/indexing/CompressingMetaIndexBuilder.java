@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.Deflater;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -50,6 +51,7 @@ import org.apache.hadoop.mapred.Partitioner;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.lib.NullOutputFormat;
+import org.apache.hadoop.util.Tool;
 import org.apache.log4j.Logger;
 import org.terrier.structures.CompressingMetaIndexInputFormat;
 import org.terrier.structures.Index;
@@ -79,7 +81,7 @@ import org.terrier.utility.io.HadoopUtility;
  * @author Craig Macdonald &amp; Vassilis Plachouras 
  */
 @SuppressWarnings("deprecation")
-public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flushable {
+public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flushable, Tool {
 	protected static final Logger logger = Logger.getLogger(CompressingMetaIndexBuilder.class);
 	protected static final int MAX_MB_IN_MEM_RETRIEVAL = 
 			Integer.parseInt(ApplicationSetup.getProperty("metaindex.compressed.max.data.in-mem.mb", "400"));
@@ -121,6 +123,67 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 	protected MemoryChecker memCheck = new RuntimeMemoryChecker();
 	protected FixedSizeWriteableFactory<Text>[] keyFactories;
 	protected String structureName;
+	
+	private JobConf conf;
+	
+	/**
+	 * This special constructor is used to invoke the job with standard hadoop
+	 */
+	public CompressingMetaIndexBuilder(IndexOnDisk _index, String[] _keynames, JobConf jc) {
+		this.index = _index;
+		this.keyNames = _keynames;
+		this.key2Index = new TObjectIntHashMap<String>(keyNames.length);
+		this.keyCount = keyNames.length;
+		for(int i=0;i<keyCount;i++)
+			this.key2Index.put(keyNames[i], i);
+		this.conf = jc;
+	}
+	
+	@Override
+	public Configuration getConf() {
+		return conf;
+	}
+
+	@Override
+	public void setConf(Configuration jc) {
+		this.conf = (JobConf)jc;
+	}
+
+	@Override
+	public int run(String[] args) throws Exception {
+		long time =System.currentTimeMillis();
+		conf.setJarByClass(CompressingMetaIndexBuilder.class);
+		conf.setJobName("Reverse MetaIndex");
+		conf.setMapOutputKeyClass(KeyValueTuple.class);
+		conf.setMapOutputValueClass(IntWritable.class);
+		conf.setMapperClass(MapperReducer.class);
+		conf.setReducerClass(MapperReducer.class);
+		conf.setNumReduceTasks(keyNames.length);
+		conf.setPartitionerClass(KeyedPartitioner.class);
+		conf.setInputFormat(CompressingMetaIndexInputFormat.class);
+		conf.setReduceSpeculativeExecution(false);
+		conf.set("MetaIndexInputStreamRecordReader.structureName", "meta");
+		conf.setInt("CompressingMetaIndexBuilder.reverse.keyCount", keyNames.length);
+		conf.set("CompressingMetaIndexBuilder.reverse.keys", ArrayUtils.join(keyNames, ","));
+		conf.set("CompressingMetaIndexBuilder.forward.valueLengths", index.getIndexProperty("index."+structureName+".value-lengths", ""));
+		conf.set("CompressingMetaIndexBuilder.forward.keys", index.getIndexProperty("index."+structureName+".key-names", ""));
+		FileOutputFormat.setOutputPath(conf, new Path(index.getPath()));
+		HadoopUtility.toHConfiguration(index, conf);
+		
+		conf.setOutputFormat(NullOutputFormat.class);
+		try{
+			RunningJob rj = JobClient.runJob(conf);
+			rj.getID();
+			HadoopUtility.finishTerrierJob(conf);
+		} catch (Exception e) { 
+			throw new Exception("Problem running job to reverse metadata", e);
+		}
+		//only update the index from the controlling process, so that we dont have locking/concurrency issues
+		index.setIndexProperty("index."+structureName+".reverse-key-names", ArrayUtils.join(keyNames, ","));
+		index.flush();
+		logger.info("Time Taken = "+((System.currentTimeMillis()-time)/1000)+" seconds");	
+		return 0;
+	}
 	
 	/**
 	 * constructor
