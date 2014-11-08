@@ -156,7 +156,6 @@ public class Hadoop_BasicSinglePassIndexer
 				throw new IOException("No such index ["+destinationIndexPath+","+ApplicationSetup.TERRIER_INDEX_PREFIX+"]");
 			}
 			
-			
 			// CompressingMetaIndexBuilder.reverseAsMapReduceJob(index, "meta", reverseMetaKeys, jf);
 			JobConf jc = jf.newJob();
 			ToolRunner.run(new CompressingMetaIndexBuilder(index, reverseMetaKeys, jc), reverseMetaKeys);
