@@ -233,6 +233,22 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		// not sure if this is effective in YARN
 		conf.setNumMapTasks(2000);
 		
+		// increase the heap usage
+		conf.set("mapreduce.map.memory.mb", "6100");
+		conf.set("mapred.job.map.memory.mb", "6100");
+		conf.set("mapreduce.reduce.memory.mb", "6144");
+		conf.set("mapred.job.reduce.memory.mb", "6144");
+		
+		conf.set("mapreduce.map.java.opts", "-Xmx6100m");
+		conf.set("mapred.map.child.java.opts", "-Xmx6100m");
+		conf.set("mapreduce.reduce.java.opts", "-Xmx6144m");
+		conf.set("mapred.reduce.child.opts", "-Xmx6144m");
+		
+		//conf.setBoolean("mapred.used.genericoptionsparser", true) ;
+		
+		// This is the nasty thing in MapReduce v2 and YARN: They always prefer their ancient jars first. Set this on to say you don't like it
+		conf.set("mapreduce.job.user.classpath.first", "true");
+		
 		// increase the yarn memory to 10 GB
 		conf.set("yarn.nodemanager.resource.memory-mb", "12288");
 		conf.set("yarn.nodemanager.resource.cpu-vcores", "16");
