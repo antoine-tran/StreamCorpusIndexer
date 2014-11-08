@@ -32,6 +32,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -542,7 +543,7 @@ public class Hadoop_BasicSinglePassIndexer
 		// Load in Run Data
 		ArrayList<String> mapTaskIDs = new ArrayList<String>();
 		
-		ArrayList<String> mapTaskParents = new ArrayList<String>();
+		Map<String, String> mapTaskParents = new HashMap<String, String>();
 		
 		
 		final LinkedList<MapData> runData = new LinkedList<MapData>();
@@ -606,7 +607,7 @@ public class Hadoop_BasicSinglePassIndexer
 				continue;
 						
 			mapTaskIDs.add(tempHRD.getMap());
-			mapTaskParents.add(file.getPath().getParent().toString());
+			mapTaskParents.put(tempHRD.getMap(), file.getPath().getParent().toString());
 			
 			runData.add(tempHRD);
 			runDataIn.close();
@@ -617,7 +618,10 @@ public class Hadoop_BasicSinglePassIndexer
 		
 		// A list of the index shards
 		MapIndexPrefixes = mapTaskIDs.toArray(new String[0]);
-		MapIndexParents = mapTaskParents.toArray(new String[0]);
+		MapIndexParents = new String[MapIndexPrefixes.length];
+		for (int i = 0; i < MapIndexPrefixes.length; i++) {
+			MapIndexParents[i] = mapTaskParents.get(MapIndexPrefixes[i]);
+		}
 		return runData;
 	}
 	
