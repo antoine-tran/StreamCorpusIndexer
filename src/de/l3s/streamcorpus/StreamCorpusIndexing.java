@@ -135,7 +135,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		final HadoopPlugin.JobFactory jf = HadoopPlugin.getJobFactory("HOD-TerrierIndexing");
 		if (args.length==2 && args[0].equals("-p"))
 		{
-			logger.info("Document-partitioned Mode, "+numberOfReducers+" output indices.");
+			logger.debug("Document-partitioned Mode, "+numberOfReducers+" output indices.");
 			numberOfReducers = Integer.parseInt(args[1]);
 			docPartitioned = true;
 		}
@@ -149,7 +149,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		}
 		else if (args.length == 0)
 		{
-			logger.info("Term-partitioned Mode, "+numberOfReducers+" reducers creating one inverted index.");
+			logger.debug("Term-partitioned Mode, "+numberOfReducers+" reducers creating one inverted index.");
 			docPartitioned = false;
 			if (numberOfReducers > MAX_REDUCE)
 			{
@@ -303,7 +303,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		final String tmpLexiconStructure = "newlex";
 		final String invertedStructure = "inverted";
 
-		logger.info("Merging lexicons");
+		logger.debug("Merging lexicons");
 		
 		//we're handling indices as streams, so dont need to load it. but remember previous status
 		//moreover, our indices dont have document objects, so errors may occur in preloading
@@ -381,7 +381,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			tt.finished();
 		}
 		lexOut.close();
-		logger.info("Structure cleanups");
+		logger.debug("Structure cleanups");
 		
 		//5. change over lexicon structures
 		final String[] structureSuffices = new String[]{"", "-entry-inputstream"};

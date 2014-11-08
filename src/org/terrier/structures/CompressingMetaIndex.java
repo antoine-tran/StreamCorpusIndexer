@@ -237,14 +237,14 @@ public class CompressingMetaIndex implements MetaIndex {
         public final long getOffset(final int docid) throws IOException
         {
         	readOffset(docid);
-        	//logger.info("Offset for docid "+ docid + " is " + lastOffset);
+        	//logger.debug("Offset for docid "+ docid + " is " + lastOffset);
             return lastOffset;
         }
 
         public final int getLength(final int docid) throws IOException
         {
         	readOffset(docid);
-        	//logger.info("length for docid "+ docid + " is " + lastLength);
+        	//logger.debug("length for docid "+ docid + " is " + lastLength);
             return lastLength;
         }
         
@@ -522,7 +522,7 @@ public class CompressingMetaIndex implements MetaIndex {
 		 * {@inheritDoc} 
 		 */
 		public boolean hasNext() {
-			//logger.info("Checking that docid "+ index + " not greater than "+ lastId);
+			//logger.debug("Checking that docid "+ index + " not greater than "+ lastId);
 			return index < lastId;			
 		}
 		/** Return the position that we are at (entry number) */
@@ -539,13 +539,13 @@ public class CompressingMetaIndex implements MetaIndex {
 			long startOffset = -1;
 			try
 			{	
-				//logger.info("Checking for index "+ (index+1) + " < last possible id " + numberOfRecords);
+				//logger.debug("Checking for index "+ (index+1) + " < last possible id " + numberOfRecords);
 				endOffset = index < (numberOfRecords-1)
 					? idx.readLong() -1
 					: fileLength-1;
 				startOffset = lastOffset;
 				final int dataLength = (int)(endOffset - lastOffset + 1);
-				//logger.info("Reading zdata file docid="+index+" start=" + lastOffset + " end="+endOffset + " length="+dataLength);
+				//logger.debug("Reading zdata file docid="+index+" start=" + lastOffset + " end="+endOffset + " length="+dataLength);
 				byte[] b = new byte[dataLength];
 				zdata.readFully(b);
 				lastOffset = endOffset +1;
@@ -561,7 +561,7 @@ public class CompressingMetaIndex implements MetaIndex {
 		                keyByteOffset[i],
 		                valueByteLengths[i]).trim();
 		        }
-		        //logger.info("Got entry " + Arrays.deepToString(sOut));
+		        //logger.debug("Got entry " + Arrays.deepToString(sOut));
 		        return sOut;
 			} catch (Exception ioe) {
 				logger.error("Problem reading MetaIndex as a stream. index="+ index + " start="+startOffset+" endOffset="+endOffset, ioe);
@@ -630,7 +630,7 @@ public class CompressingMetaIndex implements MetaIndex {
 		ByteAccessor _dataSource = null;
 		if (fileSource.equals("fileinmem"))
 		{
-			logger.info("Structure "+ structureName + " loading data file into memory");
+			logger.debug("Structure "+ structureName + " loading data file into memory");
 			try{
 				logger.debug("Caching metadata file "+ dataFilename + " to memory");
 				final DataInputStream di = new DataInputStream(Files.openFileStream(dataFilename));
@@ -850,7 +850,7 @@ public class CompressingMetaIndex implements MetaIndex {
 		
 		if (indexSource.equals("fileinmem"))
 		{
-			logger.info("Structure "+ structureName + " reading lookup file into memory");
+			logger.debug("Structure "+ structureName + " reading lookup file into memory");
 			if (indexFileLength < Integer.MAX_VALUE)
 			{	
 				try{
@@ -946,7 +946,7 @@ public class CompressingMetaIndex implements MetaIndex {
 			String loadFormat = index.getIndexProperty("index."+structureName+".reverse."+keyName+".in-mem", "false");
 			if (loadFormat.equals("hashmap"))
 			{
-				logger.info("Structure "+ structureName + " reading reverse map for key "+ keyName + " into memory as hashmap");
+				logger.debug("Structure "+ structureName + " reading reverse map for key "+ keyName + " into memory as hashmap");
 				forwardMetaMaps[i] = new FSOrderedMapFile.MapFileInMemory<Text, IntWritable>(
 						filename,
 						keyFactories[i], 
@@ -959,11 +959,11 @@ public class CompressingMetaIndex implements MetaIndex {
 				//if (revDataFileLength > Integer.MAX_VALUE)
 				//{
 				//	loadFormat = "false";
-				//	logger.info("Structure "+ structureName + " reading reverse map for key "+ keyName + " - too big for memory as bytearray");
+				//	logger.debug("Structure "+ structureName + " reading reverse map for key "+ keyName + " - too big for memory as bytearray");
 				//}
 				//else
 				//{	
-					logger.info("Structure "+ structureName + " reading reverse map for key "+ keyName + " into memory as bytearray");
+					logger.debug("Structure "+ structureName + " reading reverse map for key "+ keyName + " into memory as bytearray");
 					DataInputStream dis = new DataInputStream(Files.openFileStream(filename));
 					//final byte[] bytes = new byte[(int)revDataFileLength];
 					//dis.readFully(bytes);
@@ -978,7 +978,7 @@ public class CompressingMetaIndex implements MetaIndex {
 			
 			if (loadFormat.equals("false"))
 			{	
-				logger.info("Structure "+ structureName + " reading reverse map for key "+ keyName + " directly from disk");
+				logger.debug("Structure "+ structureName + " reading reverse map for key "+ keyName + " directly from disk");
 				forwardMetaMaps[i] = new FSOrderedMapFile<Text, IntWritable>(
 						filename, 
 						false,

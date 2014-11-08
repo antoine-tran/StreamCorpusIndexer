@@ -284,7 +284,7 @@ public class Files
 	}
 
 	/** Get the name of the file system that would be used to access a given file or directory.
-	  * @param path
+	  * @param path info(
 	  * @return name Name of the file system, or null if no filesystem found
 	  */
 	public static String getFileSystemName(String path) 
@@ -303,10 +303,7 @@ public class Files
 	 */
 	protected static InputStream openFile(String filename) throws IOException
 	{
-		logger.info("file before transformed = " + filename);
 		filename = transform(filename);
-		logger.info("file after transformed = " + filename);
-
 		final FileSystem fs = getFileSystem(filename);
 		if (fs == null)
 			throw new FileNotFoundException("No file system for "+filename);

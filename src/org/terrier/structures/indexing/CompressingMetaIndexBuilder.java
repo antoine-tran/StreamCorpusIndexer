@@ -181,7 +181,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 		//only update the index from the controlling process, so that we dont have locking/concurrency issues
 		index.setIndexProperty("index."+structureName+".reverse-key-names", ArrayUtils.join(keyNames, ","));
 		index.flush();
-		logger.info("Time Taken = "+((System.currentTimeMillis()-time)/1000)+" seconds");	
+		logger.debug("Time Taken = "+((System.currentTimeMillis()-time)/1000)+" seconds");	
 		return 0;
 	}
 	
@@ -343,7 +343,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 	 * {@inheritDoc} 
 	 */
 	public void flush() throws IOException {
-		//logger.info("CompressingMetaIndexBuilder flush");
+		//logger.debug("CompressingMetaIndexBuilder flush");
 		for(MapFileWriter w : forwardWriters)
 			((Flushable)w).flush();
 			
@@ -376,7 +376,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 		{
 			if (forwardKeyValuesSorted[i])
 			{
-				logger.info("Key "+ forwardKeyNames[i] + " values are sorted in meta index, consider binary searching zdata file");
+				logger.debug("Key "+ forwardKeyNames[i] + " values are sorted in meta index, consider binary searching zdata file");
 				forwardWriters[i].close();
 			}
 			else
@@ -459,7 +459,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 		//only update the index from the controlling process, so that we dont have locking/concurrency issues
 		index.setIndexProperty("index."+structureName+".reverse-key-names", ArrayUtils.join(keys, ","));
 		index.flush();
-		logger.info("Time Taken = "+((System.currentTimeMillis()-time)/1000)+" seconds");		
+		logger.debug("Time Taken = "+((System.currentTimeMillis()-time)/1000)+" seconds");		
 	}
 	/**
 	 * class KeyedPartitioner
@@ -631,7 +631,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 			{
 				if (currentReducingKey != null)
 				{
-					logger.info("currentKey was "+ currentReducingKey + " ("+currentKeyTupleCount+" entries) new Key is " + metaTuple.getKeyName()
+					logger.debug("currentKey was "+ currentReducingKey + " ("+currentKeyTupleCount+" entries) new Key is " + metaTuple.getKeyName()
 							+ " : force closed");
 					currentReducingOutput.close();
 					if (duplicateKeyCount > 0)
@@ -644,7 +644,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 				duplicateKeyCount = 0;
 				currentReducingKey = metaTuple.getKeyName();
 				currentReducingOutput = openMapFileWriter(currentReducingKey);
-				logger.info("Opening new MapFileWriter for key "+ currentReducingKey);
+				logger.debug("Opening new MapFileWriter for key "+ currentReducingKey);
 			}
 			final IntWritable docid = docids.next();
 			final Text key = keyFactory.newInstance();
@@ -671,7 +671,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 		{
 			if (currentKeyTupleCount > 0)
 			{
-				logger.info("Finished reducing for " + currentReducingKey +", with " +currentKeyTupleCount +" entries");
+				logger.debug("Finished reducing for " + currentReducingKey +", with " +currentKeyTupleCount +" entries");
 			}
 			if (duplicateKeyCount > 0)
 			{
@@ -687,7 +687,7 @@ public class CompressingMetaIndexBuilder extends MetaIndexBuilder implements Flu
 			final int metaKeyIndex = key2reverseOffset.get(keyName);
 			final int valueLength = key2valuelength.get(keyName);
 			keyFactory = new FixedSizeTextFactory(valueLength);
-			logger.info("Opening MapFileWriter for key "+ keyName + " - index " + metaKeyIndex);
+			logger.debug("Opening MapFileWriter for key "+ keyName + " - index " + metaKeyIndex);
 			return FSOrderedMapFile.mapFileWrite(reduceTaskFileDestinations.toString() /*index.getPath()*/ 
 						+ "/" + ((IndexOnDisk) index).getPrefix() + "."
 						+ jc.get("MetaIndexInputStreamRecordReader.structureName")

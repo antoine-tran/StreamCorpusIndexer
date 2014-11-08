@@ -252,7 +252,7 @@ public abstract class Indexer
 		if (! FieldScore.USE_FIELD_INFORMATION || FieldScore.FIELDS_COUNT == 0)
 			return;
 		numFields = FieldScore.FIELDS_COUNT;
-		logger.info("Indexer using " + numFields + " fields");
+		logger.debug("Indexer using " + numFields + " fields");
 		int i=0;
 		for (String f: FieldScore.FIELD_NAMES)
 		{
@@ -319,7 +319,7 @@ public abstract class Indexer
 				BUILDER_BOUNDARY_DOCUMENTS.add(docnos[i]);
 		}
 		if (BUILDER_BOUNDARY_DOCUMENTS.size() > 0)
-			logger.info("Watching for "+BUILDER_BOUNDARY_DOCUMENTS.size()+ " documents that force index builder boundaries.");
+			logger.debug("Watching for "+BUILDER_BOUNDARY_DOCUMENTS.size()+ " documents that force index builder boundaries.");
 	}
 	
 	/**
@@ -343,14 +343,14 @@ public abstract class Indexer
 			prefix = oldIndexPrefix + "_" + counter;
 			fileNameNoExtension = path + ApplicationSetup.FILE_SEPARATOR + prefix;
 			//ApplicationSetup.setupFilenames();
-			logger.info("creating the data structures " + prefix);
+			logger.debug("creating the data structures " + prefix);
 			this.createDirectIndex(collections);
 			this.createInvertedIndex();
 		}
 		
 		//merge the data structures
 		if (counter > 1) { 
-			logger.info("merging data structures");
+			logger.debug("merging data structures");
 			merge(path, oldIndexPrefix, 1, counter);	
 		}
 		else
@@ -398,7 +398,7 @@ public abstract class Indexer
 		IndexOnDisk src1 = Index.createIndex(index1[0], index1[1]);
 		IndexOnDisk src2 = Index.createIndex(index2[0], index2[1]);
 		IndexOnDisk dst = Index.createNewIndex(outputIndex[0], outputIndex[1]);
-		logger.info("Merging "+ src1+ " & "+ src2 +" to " + dst);
+		logger.debug("Merging "+ src1+ " & "+ src2 +" to " + dst);
 		if (ApplicationSetup.BLOCK_INDEXING) 
 			sMerger = new BlockStructureMerger(src1, src2, dst);
 		else 
@@ -436,13 +436,13 @@ public abstract class Indexer
 				// is odd), merge with the previous merged index.
 				String[] filename2 = (i==llist.size())?(tmpList.removeLast()):llist.get(i);
 				String[] outputFilename = new String[]{mpath,mprefix  + "_" + (counterMerged++)};
-				//logger.info("Merging "+ filename1 + " and " + filename2 + " to " + outputFilename);
+				//logger.debug("Merging "+ filename1 + " and " + filename2 + " to " + outputFilename);
 				mergeTwoIndices(filename1, filename2, outputFilename);
 				tmpList.add(outputFilename);
 			}
 			llist = tmpList; tmpList = null;
 		}
-		logger.info("Done merging");
+		logger.debug("Done merging");
 		
 		//rename the generated structures 
 		try{

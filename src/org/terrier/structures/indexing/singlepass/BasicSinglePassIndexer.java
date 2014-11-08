@@ -171,7 +171,7 @@ public class BasicSinglePassIndexer extends BasicIndexer{
 	 *  @param collections Collection[] the collections to be indexed.
 	 */
 	public void createInvertedIndex(Collection[] collections) {
-		logger.info("Creating IF (no direct file)..");
+		logger.debug("Creating IF (no direct file)..");
 		long startCollection, endCollection;
 		fileNames = new LinkedList<String[]>();	
 		numberOfDocuments = currentId = numberOfDocsSinceCheck = numberOfDocsSinceFlush = numberOfUniqueTerms = 0;
@@ -271,7 +271,7 @@ public class BasicSinglePassIndexer extends BasicIndexer{
 				forceFlush();
 				endCollection = System.currentTimeMillis();
 				long partialTime = (endCollection-startCollection)/1000;
-				logger.info("Collection #"+collectionNo+ " took "+partialTime+ " seconds to build the runs for "+numberOfDocuments+" documents\n");
+				logger.debug("Collection #"+collectionNo+ " took "+partialTime+ " seconds to build the runs for "+numberOfDocuments+" documents\n");
 							
 				
 				
@@ -287,17 +287,17 @@ public class BasicSinglePassIndexer extends BasicIndexer{
 				metaBuilder.close();
 				currentIndex.flush();
 				
-				logger.info("Merging "+fileNames.size()+" runs...");
+				logger.debug("Merging "+fileNames.size()+" runs...");
 				startCollection = System.currentTimeMillis();
 				
 				performMultiWayMerge();
 				currentIndex.flush();
 				endCollection = System.currentTimeMillis();
-				logger.info("Collection #"+collectionNo+" took "+((endCollection-startCollection)/1000)+" seconds to merge\n ");
-				logger.info("Collection #"+collectionNo+" total time "+( (endCollection-startCollection)/1000+partialTime));
+				logger.debug("Collection #"+collectionNo+" took "+((endCollection-startCollection)/1000)+" seconds to merge\n ");
+				logger.debug("Collection #"+collectionNo+" total time "+( (endCollection-startCollection)/1000+partialTime));
 				long secs = ((endCollection-startCollection)/1000);
 				if (secs > 3600)
-	                 logger.info("Rate: "+((double)numberOfDocuments/((double)secs/3600.0d))+" docs/hour");
+	                 logger.debug("Rate: "+((double)numberOfDocuments/((double)secs/3600.0d))+" docs/hour");
 			} catch (Exception e) {
 				logger.error("Problem finishing index", e);
 			}
@@ -334,7 +334,7 @@ public class BasicSinglePassIndexer extends BasicIndexer{
 		}
 		if (doFlush)
 		{
-			logger.info("Flush forced: " + msg);
+			logger.debug("Flush forced: " + msg);
 			forceFlush();
 		}
 	}
@@ -497,7 +497,7 @@ public class BasicSinglePassIndexer extends BasicIndexer{
 		docsPerCheck = ApplicationSetup.DOCS_CHECK_SINGLEPASS;
 		maxDocsPerFlush = Integer.parseInt(ApplicationSetup.getProperty("indexing.singlepass.max.documents.flush", "0"));
 		memoryCheck = new RuntimeMemoryChecker();
-		logger.info("Checking memory usage every " + docsPerCheck + " maxDocPerFlush=" + maxDocsPerFlush);
+		logger.debug("Checking memory usage every " + docsPerCheck + " maxDocPerFlush=" + maxDocsPerFlush);
 	}
 
 

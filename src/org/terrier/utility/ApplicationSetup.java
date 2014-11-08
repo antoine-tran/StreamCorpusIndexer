@@ -367,7 +367,7 @@ public class ApplicationSetup {
 			if (useContext)
 			{
 				 // debug
-				logger.info("USE CONTEXT");
+				logger.debug("USE CONTEXT");
 				
 				Context initCtx = null;
 				try{
@@ -399,11 +399,11 @@ public class ApplicationSetup {
 			}
 			else
 			{
-				logger.info("No context to be used....");
+				logger.debug("No context to be used....");
 				// terrier_home = System.getProperty("terrier.home", "/home/tuan/Developer/StreamCorpusIndexer");
 				terrier_home = "/home/tuan.tran/executable/StreamCorpusIndexer";
 				
-				logger.info("Terrier home: " + terrier_home);
+				logger.debug("Terrier home: " + terrier_home);
 				terrier_etc = System.getProperty("terrier.etc", terrier_home +FILE_SEPARATOR+"etc");
 				
 				
@@ -413,7 +413,7 @@ public class ApplicationSetup {
 				// propertiesFile = System.getProperty("terrier.setup", terrier_etc + FILE_SEPARATOR+"terrier.properties");
 				propertiesFile = "hdfs://master.ib:8020/user/tuan.tran/tmp/terrier/share/terrier.properties";
 				
-				logger.info("terrier properties: " + propertiesFile);
+				logger.debug("terrier properties: " + propertiesFile);
 			}
 	
 			//if system property terrier.setup is not specified, then it is 

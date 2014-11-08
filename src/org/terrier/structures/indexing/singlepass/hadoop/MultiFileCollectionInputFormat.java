@@ -114,7 +114,7 @@ public class MultiFileCollectionInputFormat extends MultiFileInputFormat<Text, S
 		{
 			numSplits = 1;
 		}
-		logger.info("Allocating "+paths.length+ " files across "+numSplits +" map tasks");
+		logger.debug("Allocating "+paths.length+ " files across "+numSplits +" map tasks");
 		List<PositionAwareSplit<CombineFileSplit>> splits = new ArrayList<PositionAwareSplit<CombineFileSplit>>(numSplits);
 		final int numPaths = paths.length;
 		long[] lengths = new long[numPaths];

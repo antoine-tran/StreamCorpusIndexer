@@ -134,7 +134,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 					files.add(filename);
 			}
 			br2.close();
-			logger.info("TRECCollection read collection specification ("+files.size()+" files)");
+			// logger.info("TRECCollection read collection specification ("+files.size()+" files)");
 		} catch (IOException ioe) {
 			logger.error("Input output exception while loading the collection.spec file. "
 					+ "("+CollectionSpecFilename+")", ioe);
@@ -218,7 +218,7 @@ public class StreamCorpusCollection implements Collection, Iterator<Document> {
 						} catch (TTransportException e) {				
 							int type = e.getType();
 							if (type == TTransportException.END_OF_FILE) {
-								logger.info("Reaching end of file");
+								logger.debug("Reaching end of file");
 								if (openNextFile()) {									
 									continue scanning;
 								} else {

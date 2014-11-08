@@ -102,9 +102,9 @@ public class CompressingMetaIndexInputFormat implements InputFormat<IntWritable,
 	{
 		HadoopUtility.loadTerrierJob(jc);
 		
-		logger.info("load split from :");
+		logger.debug("load split from :");
 		for (String s :  _split.getLocations()) {
-			logger.info(s);
+			logger.debug(s);
 		}
 		
 		//load the index
@@ -189,7 +189,7 @@ public class CompressingMetaIndexInputFormat implements InputFormat<IntWritable,
 			blockSizeSoFar = lastRead - startingBlockLocation;
 			final String[] hosts = getHosts(fs, fSys, startingBlockLocation, blockSizeSoFar);
 			
-			logger.info("Create new MetaIndexSplit with start = " + startingId + ", end = " + currentId);
+			logger.debug("Create new MetaIndexSplit with start = " + startingId + ", end = " + currentId);
 			
 			MetaIndexSplit s = new MetaIndexSplit(new Path(dataFilename), startingBlockLocation, blockSizeSoFar, hosts, startingId, currentId-1);
 			logger.debug("Got last split: "+ s);

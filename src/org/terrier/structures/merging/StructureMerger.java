@@ -636,13 +636,13 @@ public class StructureMerger {
 		{
 			mergeInvertedFiles();
 			t2 = System.currentTimeMillis();
-	        logger.info("merged inverted files in " + ((t2-t1)/1000.0d));
+	        logger.debug("merged inverted files in " + ((t2-t1)/1000.0d));
 		}
 		else if (bothLexicon)
 		{
 			new LexiconMerger(srcIndex1, srcIndex2, destIndex).mergeLexicons();
 			t2 = System.currentTimeMillis();
-    	    logger.info("merged lexicons in " + ((t2-t1)/1000.0d));
+    	    logger.debug("merged lexicons in " + ((t2-t1)/1000.0d));
 		}
 		else
 		{
@@ -662,13 +662,13 @@ public class StructureMerger {
 		{	
 			mergeDocumentIndexFiles();
 			t4 = System.currentTimeMillis();
-			logger.info("merged documentindex files in " + ((t4-t3)/1000.0d));
+			logger.debug("merged documentindex files in " + ((t4-t3)/1000.0d));
 		} 
 		else 
 		{
 			mergeDirectFiles();	
 			t4 = System.currentTimeMillis();
-			logger.info("merged direct files in " + ((t4-t3)/1000.0d));
+			logger.debug("merged direct files in " + ((t4-t3)/1000.0d));
 		}
 	
 		if (keepTermCodeMap)
@@ -697,7 +697,7 @@ public class StructureMerger {
 		
 		StructureMerger sMerger = new StructureMerger(indexSrc1, indexSrc2, indexDest);
 		long start = System.currentTimeMillis();
-		logger.info("started at " + (new Date()));
+		logger.debug("started at " + (new Date()));
 		if (ApplicationSetup.getProperty("merger.onlylexicons","false").equals("true")) {
 			System.err.println("Use LexiconMerger");
 			return;
@@ -710,9 +710,9 @@ public class StructureMerger {
 		indexSrc2.close();
 		indexDest.close();
 		
-		logger.info("finished at " + (new Date()));
+		logger.debug("finished at " + (new Date()));
 		long end = System.currentTimeMillis();
-		logger.info("time elapsed: " + ((end-start)*1.0d/1000.0d) + " sec.");
+		logger.debug("time elapsed: " + ((end-start)*1.0d/1000.0d) + " sec.");
 	}
 
 

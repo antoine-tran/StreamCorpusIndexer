@@ -284,11 +284,11 @@ public class Hadoop_BasicSinglePassIndexer
 	{	
 		super.init();
 		
-		logger.info("Configuring the map");
+		logger.debug("Configuring the map");
 		
 		Path indexDestination = FileOutputFormat.getWorkOutputPath(jc);
 				
-		logger.info("[Map configuration]: Index destination : " + indexDestination.toString());
+		logger.debug("[Map configuration]: Index destination : " + indexDestination.toString());
 		
 		//Files.mkdir(indexDestination.toString());
 		recursiveMkdir(indexDestination);
@@ -302,7 +302,7 @@ public class Hadoop_BasicSinglePassIndexer
 		
 		// Recursively create parent dirs in Hadoop YARN
 		Path p = new Path(indexDestination, mapTaskID+".runs");
-		logger.info("attempting to create " + p.toString());
+		logger.debug("attempting to create " + p.toString());
 		
 		recursiveMkdir(p.getParent());		
 		
@@ -350,18 +350,18 @@ public class Hadoop_BasicSinglePassIndexer
 	/** causes the posting lists built up in memory to be flushed out */
 	protected void forceFlush() throws IOException
 	{
-		logger.info("Map "+mapTaskID+", flush requested, containing "+numberOfDocsSinceFlush+" documents, flush "+flushNo);
+		logger.debug("Map "+mapTaskID+", flush requested, containing "+numberOfDocsSinceFlush+" documents, flush "+flushNo);
 		if (mp == null)
 			throw new IOException("Map flushed before any documents were indexed");
 		mp.finish(new HadoopRunWriter(outputPostingListCollector, mapTaskID, splitnum, flushNo));
 		RunData.writeInt(currentId);
 		if (currentReporter != null)
 			currentReporter.incrCounter(Counters.INDEXER_FLUSHES, 1);
-		logger.info("Flushed successfully");
+		logger.debug("Flushed successfully");
 		System.gc();
 		createMemoryPostings();
 		memoryCheck.reset();
-		logger.info("New memory posting created");
+		logger.debug("New memory posting created");
 		numberOfDocsSinceFlush = 0;
 		if (RESET_IDS_ON_FLUSH)
 			currentId = 0;
@@ -484,7 +484,7 @@ public class Hadoop_BasicSinglePassIndexer
 		RunData.writeInt(numberOfDocuments);
 		RunData.writeInt(splitnum);
 		RunData.close();
-		logger.info("Map "+mapTaskID+ " finishing, indexed "+numberOfDocuments+ " in "+(flushNo-1)+" flushes");
+		logger.debug("Map "+mapTaskID+ " finishing, indexed "+numberOfDocuments+ " in "+(flushNo-1)+" flushes");
 	}
 
 	/* ==============================================================
@@ -510,7 +510,7 @@ public class Hadoop_BasicSinglePassIndexer
 		super.init();
 		start = true;
 		
-		logger.info("Configuring the reduces");
+		logger.debug("Configuring the reduces");
 		
 		//load in the current index
 		final Path indexDestination = FileOutputFormat.getWorkOutputPath(jc);
@@ -597,7 +597,7 @@ public class Hadoop_BasicSinglePassIndexer
 		MapData tempHRD;
 		for (FileStatus file : files) 
 		{
-			logger.info("Run data file "+ file.getPath().toString()+" has length "
+			logger.debug("Run data file "+ file.getPath().toString()+" has length "
 					+Files.length(file.getPath().toString()));
 			runDataIn = new DataInputStream(Files.openFileStream(file.getPath().toString()));
 			tempHRD = new MapData(runDataIn);
@@ -652,7 +652,7 @@ public class Hadoop_BasicSinglePassIndexer
 	 */
 	public void startReduce(LinkedList<MapData> mapData) throws IOException
 	{
-		logger.info("The number of Reduce Tasks being used : "+jc.getNumReduceTasks());
+		logger.debug("The number of Reduce Tasks being used : "+jc.getNumReduceTasks());
 		((HadoopRunsMerger)(super.merger)).beginMerge(mapData);
 		this.currentIndex.setIndexProperty("max.term.length", ApplicationSetup.getProperty("max.term.length", ""+20));
 		lexstream = new FSOMapFileLexiconOutputStream(this.currentIndex, "lexicon", 
@@ -703,7 +703,7 @@ public class Hadoop_BasicSinglePassIndexer
 	@SuppressWarnings("unchecked")
 	protected void mergeDocumentIndex(Index[] src, int numdocs) throws IOException
 	{
-		logger.info("Merging document and meta indices");
+		logger.debug("Merging document and meta indices");
 		final DocumentIndexBuilder docidOutput = new DocumentIndexBuilder(currentIndex, "document");
 		final MetaIndexBuilder metaBuilder = this.createMetaIndexBuilder();
 		int docCount =-1;
@@ -747,7 +747,7 @@ public class Hadoop_BasicSinglePassIndexer
 			logger.warn("Mismatch between expected ("+numdocs+") and found document counts ("+docCount+")");
 		}
 		
-		logger.info("Finished merging document indices from "+src.length+" map tasks: "+docCount +" documents found");
+		logger.debug("Finished merging document indices from "+src.length+" map tasks: "+docCount +" documents found");
 	}
 
 	/** finishes the reduce step, by closing the lexicon and inverted file output,
@@ -838,7 +838,7 @@ public class Hadoop_BasicSinglePassIndexer
 
 	/** Creates the RunsMerger and the RunIteratorFactory */
 	protected RunsMerger createtheRunMerger() {
-		logger.info("creating run merged with fields="+useFieldInformation);
+		logger.debug("creating run merged with fields="+useFieldInformation);
 		runIteratorF = 
 			new HadoopRunIteratorFactory(null, 
 				(useFieldInformation 
