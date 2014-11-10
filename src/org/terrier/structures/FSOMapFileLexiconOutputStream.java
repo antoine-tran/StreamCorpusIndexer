@@ -68,14 +68,14 @@ public class FSOMapFileLexiconOutputStream extends LexiconOutputStream<String>
 	 */
 	public FSOMapFileLexiconOutputStream(String path, String prefix, String _structureName, 
 			FixedSizeWriteableFactory<Text> _keyFactory) throws IOException
-	{
+			{
 		super();
 		this.structureName = _structureName;
 		mapFileWriter = FSOrderedMapFile.mapFileWrite(FSOMapFileLexicon.constructFilename(structureName, path, prefix, FSOMapFileLexicon.MAPFILE_EXT));
 		keyFactory = _keyFactory;
 		tempKey = keyFactory.newInstance();
-	}
-	
+			}
+
 	@SuppressWarnings("unchecked")
 	static FixedSizeWriteableFactory<Text> getKeyFactory(Index _index, String _structureName) throws IOException
 	{
@@ -95,11 +95,11 @@ public class FSOMapFileLexiconOutputStream extends LexiconOutputStream<String>
 	 */
 	public FSOMapFileLexiconOutputStream(IndexOnDisk _index, String _structureName, 
 			Class<? extends FixedSizeWriteableFactory<LexiconEntry>>valueFactoryClass) throws IOException
-	{
+			{
 		this(_index.getPath(), _index.getPrefix(), _structureName, getKeyFactory(_index, _structureName));
 		this.index = _index;
 		leValueClassname = valueFactoryClass.getName();
-	}
+			}
 
 	/**
 	 * Construct an instance of the class with
@@ -112,12 +112,12 @@ public class FSOMapFileLexiconOutputStream extends LexiconOutputStream<String>
 	public FSOMapFileLexiconOutputStream(IndexOnDisk _index, String _structureName, 
 			FixedSizeWriteableFactory<Text> _keyFactory,
 			Class<? extends FixedSizeWriteableFactory<LexiconEntry>>valueFactoryClass) throws IOException
-	{
+			{
 		this(_index.getPath(), _index.getPrefix(), _structureName, _keyFactory);
 		this.index = _index;
 		leValueClassname = valueFactoryClass.getName();
-				
-	}
+
+			}
 	/**
 	 * Construct an instance of the class with
 	 * @param _index
@@ -129,27 +129,34 @@ public class FSOMapFileLexiconOutputStream extends LexiconOutputStream<String>
 	public FSOMapFileLexiconOutputStream(IndexOnDisk _index, String _structureName, 
 			FixedSizeWriteableFactory<Text> _keyFactory,
 			String valueFactoryClassName) throws IOException
-	{
+			{
 		this(_index.getPath(), _index.getPrefix(), _structureName, _keyFactory);
 		this.index = _index;
 		leValueClassname = valueFactoryClassName;				
-	}
-	
+			}
+
 	@Override
-	public int writeNextEntry(String _key, LexiconEntry _value) throws IOException {
-		tempKey.set(_key);
-		mapFileWriter.write(tempKey, _value);
-		super.incrementCounters(_value);
+	public int writeNextEntry(String _key, LexiconEntry _value) throws IOException {		
+		boolean successful = false;
+		try {
+			tempKey.set(_key);
+			mapFileWriter.write(tempKey, _value);
+			successful = true;
+		} catch (Exception e) {
+			successful = false;
+		}
+		if (successful)
+			super.incrementCounters(_value);
 		return keyFactory.getSize() /* + TODO */;
 	}
-	
+
 	@Override
 	public void close()
 	{
 		try{
 			mapFileWriter.close();
 		} catch (IOException ioe) {}
-		
+
 		if (index != null)
 		{
 			addLexiconToIndex(index, this.structureName, this.leValueClassname);
