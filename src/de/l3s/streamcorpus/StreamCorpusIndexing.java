@@ -268,7 +268,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			conf.setPartitionerClass(HashPartitioner.class);
 		}
 		
-		JobID jobId = null;
+		/*JobID jobId = null;
 		boolean ranOK = true;
 		try{
 			RunningJob rj = JobClient.runJob(conf);
@@ -282,11 +282,12 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		if (jobId != null)
 		{
 			deleteTaskFiles(ApplicationSetup.TERRIER_INDEX_PATH, jobId);
-		} 
+		}  */
 		
 		// Quick hack for streamed documents on 2011-12-19: Clean the index even if there are errors
 		//if (ranOK)
 		//{
+		System.out.println("Merging indices");
 			if (! docPartitioned)
 			{
 				if (numberOfReducers > 1)
