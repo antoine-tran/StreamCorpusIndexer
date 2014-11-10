@@ -282,9 +282,11 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		if (jobId != null)
 		{
 			deleteTaskFiles(ApplicationSetup.TERRIER_INDEX_PATH, jobId);
-		}
-		if (ranOK)
-		{
+		} 
+		
+		// Quick hack for streamed documents on 2011-12-19: Clean the index even if there are errors
+		//if (ranOK)
+		//{
 			if (! docPartitioned)
 			{
 				if (numberOfReducers > 1)
@@ -295,7 +297,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 					ApplicationSetup.TERRIER_INDEX_PATH, 
 					docPartitioned ? numberOfReducers : 1, 
 					jf);
-		}
+		//}
 		System.out.println("Time Taken = "+((System.currentTimeMillis()-time)/1000)+" seconds");
 		jf.close();
 		return 0;
