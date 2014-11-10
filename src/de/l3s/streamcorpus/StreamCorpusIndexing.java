@@ -107,29 +107,29 @@ import org.terrier.utility.io.HadoopUtility;
  * 
  * @author Richard McCreadie and Craig Macdonald
  * @since 2.2
-*/
+ */
 @SuppressWarnings("deprecation")
 public class StreamCorpusIndexing extends Configured implements Tool
 {
 	static final int MAX_REDUCE = 26;
 	/** logger for this class */
 	protected static final Logger logger = Logger.getLogger(StreamCorpusIndexing.class);
-	
+
 	/*private static String usage()
 	{
 		return "Usage: HadoopIndexing [-p]";
 	}*/
-	
+
 	/** Starts the MapReduce indexing.
 	 * @param args
 	 * @throws Exception
 	 */	
 	public int run(String[] args) throws Exception {
 		long time = System.currentTimeMillis();
-			
+
 		// For the moment: Hard-code the terrier home to quick test
 		System.setProperty("terrier.home", "/home/tuan.tran/executable/StreamCorpusIndexer");
-		
+
 		boolean docPartitioned = false;
 		int numberOfReducers = Integer.parseInt(ApplicationSetup.getProperty("terrier.hadoop.indexing.reducers", "26"));
 		final HadoopPlugin.JobFactory jf = HadoopPlugin.getJobFactory("HOD-TerrierIndexing");
@@ -154,24 +154,24 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			if (numberOfReducers > MAX_REDUCE)
 			{
 				logger.warn("Excessive reduce tasks ("+numberOfReducers+") in use "
-					+"- SplitEmittedTerm.SETPartitionerLowercaseAlphaTerm can use "+MAX_REDUCE+" at most");
+						+"- SplitEmittedTerm.SETPartitionerLowercaseAlphaTerm can use "+MAX_REDUCE+" at most");
 			}
 		} 
-		
+
 		/*else
 		{
 			logger.fatal(usage());
 			return 0;
 		}*/
-		
+
 		if (! (CompressionFactory.getCompressionConfiguration("inverted", new String[0], false) instanceof BitCompressionConfiguration ))
-        {
-        	logger.error("Sorry, only default BitCompressionConfiguration is supported by HadoopIndexing"
-        			+ " - you can recompress the inverted index later using IndexRecompressor");
-        	return 0;
-        }
-		
-		
+		{
+			logger.error("Sorry, only default BitCompressionConfiguration is supported by HadoopIndexing"
+					+ " - you can recompress the inverted index later using IndexRecompressor");
+			return 0;
+		}
+
+
 		if (jf == null)
 			throw new Exception("Could not get JobFactory from HadoopPlugin");
 		final JobConf conf = jf.newJob();
@@ -180,10 +180,10 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		if (Files.exists(ApplicationSetup.TERRIER_INDEX_PATH) && Index.existsIndex(ApplicationSetup.TERRIER_INDEX_PATH, ApplicationSetup.TERRIER_INDEX_PREFIX))
 		{
 			logger.fatal("Cannot index while index exists at "
-				+ApplicationSetup.TERRIER_INDEX_PATH+"," + ApplicationSetup.TERRIER_INDEX_PREFIX);
+					+ApplicationSetup.TERRIER_INDEX_PATH+"," + ApplicationSetup.TERRIER_INDEX_PREFIX);
 			return 0;
 		}
-		
+
 		// boolean blockIndexing = ApplicationSetup.BLOCK_INDEXING;
 		boolean blockIndexing = true;
 		if (blockIndexing)
@@ -201,7 +201,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		conf.setMapOutputKeyClass(SplitEmittedTerm.class);
 		conf.setMapOutputValueClass(MapEmittedPostingList.class);
 		conf.setBoolean("indexing.hadoop.multiple.indices", docPartitioned);
-		
+
 		if (! conf.get("mapred.job.tracker").equals("local"))
 		{
 			conf.setMapOutputCompressorClass(GzipCodec.class);
@@ -211,7 +211,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		{
 			conf.setCompressMapOutput(false);
 		}
-		
+
 		conf.setInputFormat(MultiFileCollectionInputFormat.class);
 		conf.setOutputFormat(NullOutputFormat.class);
 		conf.setOutputKeyComparatorClass(SplitEmittedTerm.SETRawComparatorTermSplitFlush.class);
@@ -229,31 +229,31 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		}
 		specBR.close();
 		FileInputFormat.setInputPaths(conf,paths.toArray(new Path[paths.size()]));
-		
+
 		// not sure if this is effective in YARN
 		conf.setNumMapTasks(2000);
-		
+
 		// increase the heap usage
 		conf.set("mapreduce.map.memory.mb", "6100");
 		conf.set("mapred.job.map.memory.mb", "6100");
 		conf.set("mapreduce.reduce.memory.mb", "6144");
 		conf.set("mapred.job.reduce.memory.mb", "6144");
-		
+
 		conf.set("mapreduce.map.java.opts", "-Xmx6100m");
 		conf.set("mapred.map.child.java.opts", "-Xmx6100m");
 		conf.set("mapreduce.reduce.java.opts", "-Xmx6144m");
 		conf.set("mapred.reduce.child.opts", "-Xmx6144m");
-		
+
 		//conf.setBoolean("mapred.used.genericoptionsparser", true) ;
-		
+
 		// This is the nasty thing in MapReduce v2 and YARN: They always prefer their ancient jars first. Set this on to say you don't like it
 		conf.set("mapreduce.job.user.classpath.first", "true");
-		
+
 		// increase the yarn memory to 10 GB
 		conf.set("yarn.nodemanager.resource.memory-mb", "12288");
 		conf.set("yarn.nodemanager.resource.cpu-vcores", "16");
 		conf.set("yarn.scheduler.minimum-allocation-mb", "4096");
-		
+
 		conf.setNumReduceTasks(numberOfReducers);
 		if (numberOfReducers> 1)
 		{
@@ -267,7 +267,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			//for JUnit tests, we seem to need to restore the original partitioner class
 			conf.setPartitionerClass(HashPartitioner.class);
 		}
-		
+
 		/*JobID jobId = null;
 		boolean ranOK = true;
 		try{
@@ -283,27 +283,26 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		{
 			deleteTaskFiles(ApplicationSetup.TERRIER_INDEX_PATH, jobId);
 		}  */
-		
-		// Quick hack for streamed documents on 2011-12-19: Clean the index even if there are errors
+
 		//if (ranOK)
 		//{
 		System.out.println("Merging indices");
-			if (! docPartitioned)
-			{
-				if (numberOfReducers > 1)
-					mergeLexiconInvertedFiles(ApplicationSetup.TERRIER_INDEX_PATH, numberOfReducers);
-			}
-			
-			Hadoop_BasicSinglePassIndexer.finish(
-					ApplicationSetup.TERRIER_INDEX_PATH, 
-					docPartitioned ? numberOfReducers : 1, 
-					jf);
+		if (! docPartitioned)
+		{
+			if (numberOfReducers > 1)
+				mergeLexiconInvertedFiles(ApplicationSetup.TERRIER_INDEX_PATH, numberOfReducers);
+		}
+
+		Hadoop_BasicSinglePassIndexer.finish(
+				ApplicationSetup.TERRIER_INDEX_PATH, 
+				docPartitioned ? numberOfReducers : 1, 
+						jf);
 		//}
 		System.out.println("Time Taken = "+((System.currentTimeMillis()-time)/1000)+" seconds");
 		jf.close();
 		return 0;
 	}
-	
+
 	public static void main(String[] args) {
 		try {
 			ToolRunner.run(new StreamCorpusIndexing(), args);
@@ -311,7 +310,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			e.printStackTrace();
 		}
 	}
-	
+
 	/** for term partitioned indexing, this method merges the lexicons from each reducer
 	 * @param index_path path of index
 	 * @param numberOfReducers number of inverted files expected
@@ -323,13 +322,13 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		final String invertedStructure = "inverted";
 
 		logger.debug("Merging lexicons");
-		
+
 		//we're handling indices as streams, so dont need to load it. but remember previous status
 		//moreover, our indices dont have document objects, so errors may occur in preloading
 		final boolean indexProfile = Index.getIndexLoadingProfileAsRetrieval();
 		Index.setIndexLoadingProfileAsRetrieval(false);
-		
-		
+
+
 		//1. load in the input indices
 		final Index[] srcIndices = new Index[numberOfReducers];
 		final boolean[] existsIndices = new boolean[numberOfReducers];
@@ -343,7 +342,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			{
 				//remove any empty inverted file for this segment
 				Files.delete(BitPostingIndexInputStream.getFilename(index_path, index_prefix, invertedStructure, (byte)1, (byte)1));
-				
+
 				//remember that this index doesnt exist
 				existsIndices[i] = false;
 				logger.warn("No reduce "+i+" output : no output index ["+index_path+","+index_prefix+ "]");
@@ -357,13 +356,13 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		{
 			throw new IllegalArgumentException("No index found at " + index_path + ","+ ApplicationSetup.TERRIER_INDEX_PREFIX+"-"+0);
 		}
-		
+
 		//3. create the new lexicon
 		LexiconOutputStream<String> lexOut = new FSOMapFileLexiconOutputStream(
 				(IndexOnDisk)dest, tmpLexiconStructure, 
 				(FixedSizeWriteableFactory<Text>) dest.getIndexStructure(lexiconStructure + "-keyfactory"),
 				(Class<? extends FixedSizeWriteableFactory<LexiconEntry>>) dest.getIndexStructure(lexiconStructure + "-valuefactory").getClass());
-		
+
 		//4. append each source lexicon on to the new lexicon, amending the filenumber as we go
 		TerrierTimer tt = new TerrierTimer("Merging lexicon entries", terms);
 		tt.start();
@@ -386,8 +385,14 @@ public class StreamCorpusIndexing extends Configured implements Tool
 					Map.Entry<String,LexiconEntry> e = lexIn.next();
 					e.getValue().setTermId(termId);
 					((BitIndexPointer)e.getValue()).setFileNumber((byte)i);
-					lexOut.writeNextEntry(e.getKey(), e.getValue());
-					termId++;
+					try {
+						lexOut.writeNextEntry(e.getKey(), e.getValue());
+						termId++;
+					}
+					catch (Exception ex) {
+						logger.warn("One entry cannot be written. It's okay, just get over it !! ");
+					}
+
 				}
 				IndexUtil.close(lexIn);
 				//rename the inverted file to be part of the destination index
@@ -401,7 +406,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 		}
 		lexOut.close();
 		logger.debug("Structure cleanups");
-		
+
 		//5. change over lexicon structures
 		final String[] structureSuffices = new String[]{"", "-entry-inputstream"};
 		//remove old lexicon structures
@@ -417,24 +422,24 @@ public class StreamCorpusIndexing extends Configured implements Tool
 				logger.warn("Structure " + tmpLexiconStructure + suffix + " not found when renaming");
 		}
 		IndexUtil.deleteStructure(dest, tmpLexiconStructure + "-valuefactory");
-		
+
 		//6. update destination index
-		
+
 		if (FieldScore.FIELDS_COUNT > 0)
 			dest.addIndexStructure("lexicon-valuefactory", FieldLexiconEntry.Factory.class.getName(), "java.lang.String", "${index.inverted.fields.count}");
 		dest.setIndexProperty("index."+invertedStructure+".data-files", ""+numberOfReducers);
 		LexiconBuilder.optimise((IndexOnDisk)dest, lexiconStructure);
 		dest.flush();
-		
+
 		//7. close source and dest indices
 		for(Index src: srcIndices) //dest is also closed
 		{
 			if (src != null)
 				src.close();
 		}
-		
+
 		//8. rearrange indices into desired layout
-		
+
 		//rename target index
 		IndexUtil.renameIndex(index_path, ApplicationSetup.TERRIER_INDEX_PREFIX+"-"+0, index_path, ApplicationSetup.TERRIER_INDEX_PREFIX);
 		//delete other source indices
@@ -443,7 +448,7 @@ public class StreamCorpusIndexing extends Configured implements Tool
 			if (existsIndices[i])
 				IndexUtil.deleteIndex(index_path, ApplicationSetup.TERRIER_INDEX_PREFIX+"-"+i);
 		}
-		
+
 		//restore loading profile
 		Index.setIndexLoadingProfileAsRetrieval(indexProfile);
 	}
@@ -466,5 +471,5 @@ public class StreamCorpusIndexing extends Configured implements Tool
 				}
 			} catch (Exception e) {}
 		}   
-	 }
+	}
 }
